@@ -17,6 +17,13 @@
             </div>
         </div>
         <div style="display: flex; gap: 8px;">
+            @* Add Logic Button - Only for questions with options *@
+            @if (Model.Options.Any())
+            {
+                <md-icon-button onclick="manageLogic('@Model.QuestionId')" title="Add logic">
+                    <md-icon>rule</md-icon>
+                </md-icon-button>
+            }
             <md-icon-button onclick="duplicateQuestion('@Model.QuestionId')" title="Duplicate">
                 <md-icon>content_copy</md-icon>
             </md-icon-button>

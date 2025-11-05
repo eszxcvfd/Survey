@@ -94,18 +94,8 @@ async function addQuestion(questionType) {
         hideLoading();
 
         if (result.success) {
-            // Add the new question card to the container
-            const container = document.getElementById('questionsContainer');
-            const newCard = createQuestionCard(result.question);
-            container.appendChild(newCard);
-            
-            // Update question count
-            updateQuestionCount();
-            
-            // Scroll to new question
-            newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            showToast('Question added successfully', 'success');
+            // Reload page to show new question
+            location.reload();
         } else {
             showToast(result.message || 'Failed to add question', 'error');
         }
@@ -167,13 +157,7 @@ async function deleteQuestion(questionId) {
         hideLoading();
 
         if (result.success) {
-            const card = document.querySelector(`[data-question-id="${questionId}"]`);
-            if (card) {
-                card.remove();
-                updateQuestionCount();
-                renumberQuestions();
-            }
-            showToast('Question deleted successfully', 'success');
+            location.reload();
         } else {
             showToast(result.message || 'Failed to delete question', 'error');
         }
@@ -186,15 +170,20 @@ async function deleteQuestion(questionId) {
 
 // Duplicate a question
 function duplicateQuestion(questionId) {
-    const card = document.querySelector(`[data-question-id="${questionId}"]`);
-    if (!card) return;
-
-    const questionData = extractQuestionData(card);
-    questionData.questionId = '00000000-0000-0000-0000-000000000000'; // New GUID will be generated
-    questionData.questionText = questionData.questionText + ' (Copy)';
-
-    // For now, just add a new question - you could enhance this to actually duplicate
     showToast('Duplicate feature coming soon', 'info');
+}
+
+// Manage logic for a question
+function manageLogic(questionId) {
+    // Redirect to Branch Logic page with surveyId
+    const surveyIdElement = document.getElementById('surveyId');
+    if (surveyIdElement) {
+        const surveyId = surveyIdElement.value;
+        window.location.href = `/BranchLogic/Index?id=${surveyId}`;
+    } else {
+        console.error('Survey ID not found');
+        showToast('Error: Survey ID not found', 'error');
+    }
 }
 
 // Add an option to a question
@@ -316,12 +305,6 @@ function extractQuestionData(card) {
     };
 }
 
-function createQuestionCard(question) {
-    // This would need server-side rendering or a more complex client-side template
-    // For now, reload the page
-    location.reload();
-}
-
 function renumberQuestions() {
     const questionCards = document.querySelectorAll('.question-card');
     questionCards.forEach((card, index) => {
@@ -347,31 +330,47 @@ function previewSurvey() {
 
 // UI helper functions
 function showLoading(message) {
-    // Implement loading indicator
     console.log('Loading:', message);
 }
 
 function hideLoading() {
-    // Hide loading indicator
     console.log('Loading complete');
 }
 
 function showToast(message, type) {
-    // Create a simple toast notification
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
         <span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
         <span>${message}</span>
     `;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 16px 24px;
+        background-color: ${type === 'success' ? 'var(--md-sys-color-primary-container)' : type === 'error' ? 'var(--md-sys-color-error-container)' : 'var(--md-sys-color-surface-variant)'};
+        color: ${type === 'success' ? 'var(--md-sys-color-on-primary-container)' : type === 'error' ? 'var(--md-sys-color-on-error-container)' : 'var(--md-sys-color-on-surface-variant)'};
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    `;
     document.body.appendChild(toast);
     
     setTimeout(() => {
-        toast.classList.add('show');
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
     }, 10);
     
     setTimeout(() => {
-        toast.classList.remove('show');
+        toast.style.transform = 'translateY(100px)';
+        toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }

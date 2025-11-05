@@ -18,6 +18,7 @@ builder.Services.AddScoped<ISurveyRepository, SurveyRepository>();
 builder.Services.AddScoped<ISurveyCollaboratorRepository, SurveyCollaboratorRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionOptionRepository, QuestionOptionRepository>();
+builder.Services.AddScoped<IBranchLogicRepository, BranchLogicRepository>();
 
 // Đăng ký Security Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISurveyCollaboratorService, SurveyCollaboratorService>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<ISurveyDesignerService, SurveyDesignerService>();
+builder.Services.AddScoped<IBranchLogicService, BranchLogicService>();
 
 // Thêm Session
 builder.Services.AddSession(options =>

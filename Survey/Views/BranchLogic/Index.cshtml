@@ -1,0 +1,392 @@
+﻿@model ManageLogicViewModel
+@{
+    ViewData["Title"] = "Survey Logic - " + Model.SurveyTitle;
+}
+
+<div class="container" style="max-width: 1200px; padding: 24px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <md-icon-button href="@Url.Action("Index", "SurveyDesigner", new { id = Model.SurveyId })">
+                <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div>
+                <h1 class="md-typescale-display-small">Survey Logic</h1>
+                <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                    @Model.SurveyTitle
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="card-surface" style="padding: 16px; margin-bottom: 24px; border-radius: 12px; background-color: var(--md-sys-color-tertiary-container);">
+        <div style="display: flex; gap: 12px; align-items: start;">
+            <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container);">info</span>
+            <div>
+                <h3 class="md-typescale-title-medium" style="color: var(--md-sys-color-on-tertiary-container); margin-bottom: 8px;">How Logic Works</h3>
+                <ul style="color: var(--md-sys-color-on-tertiary-container); margin: 0; padding-left: 20px;">
+                    <li><strong>Show Question:</strong> Jump to a specific question when an answer is selected</li>
+                    <li><strong>Skip Question:</strong> Skip to a specific question, bypassing questions in between</li>
+                    <li><strong>End Survey:</strong> Immediately end the survey when an answer is selected</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success md-typescale-body-large" style="display: flex; align-items: center; gap: 16px; padding: 20px 24px; margin-bottom: 24px; background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%); color: #155724; border-radius: 16px; border-left: 6px solid #28A745; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); animation: slideInRight 0.4s ease-out;">
+            <span class="material-symbols-outlined" style="font-size: 32px; color: #28A745;">check_circle</span>
+            <div style="flex: 1;">
+                <strong style="display: block; font-size: 16px; margin-bottom: 4px;">Success!</strong>
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-error md-typescale-body-large" style="display: flex; align-items: start; gap: 16px; padding: 20px 24px; margin-bottom: 24px; background: linear-gradient(135deg, #F8D7DA 0%, #F5C2C7 100%); color: #842029; border-radius: 16px; border-left: 6px solid #DC3545; box-shadow: 0 4px 16px rgba(220, 53, 69, 0.25); animation: shake 0.5s ease-in-out;">
+            <span class="material-symbols-outlined" style="font-size: 36px; color: #DC3545; animation: pulse 2s infinite;">error</span>
+            <div style="flex: 1;">
+                <strong style="display: block; font-size: 18px; margin-bottom: 8px; color: #DC3545;">⚠️ Cannot Add Logic Rule</strong>
+                <p style="margin: 0; line-height: 1.6;">@TempData["ErrorMessage"]</p>
+            </div>
+            <md-icon-button onclick="this.parentElement.style.display='none'" title="Dismiss">
+                <md-icon style="color: #842029;">close</md-icon>
+            </md-icon-button>
+        </div>
+    }
+
+    <!-- Existing Rules -->
+    @if (Model.Rules.Any())
+    {
+        <div class="card-surface" style="padding: 24px; margin-bottom: 24px; border-radius: 12px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">
+                Active Logic Rules (@Model.Rules.Count)
+            </h2>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                @foreach (var rule in Model.Rules.OrderBy(r => r.PriorityOrder))
+                {
+                    <div class="logic-rule-card" style="padding: 16px; background-color: var(--md-sys-color-surface-variant); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="md-typescale-label-small" style="padding: 4px 8px; background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 4px;">
+                                    Rule #@rule.PriorityOrder
+                                </span>
+                                <span class="md-typescale-label-small" style="padding: 4px 8px; background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: 4px;">
+                                    @(rule.TargetAction == "ShowQuestion" ? "JUMP TO" : 
+                                      rule.TargetAction == "SkipQuestion" ? "SKIP TO" : 
+                                      "END SURVEY")
+                                </span>
+                            </div>
+                            <p class="md-typescale-body-medium" style="margin: 0;">@rule.RuleDescription</p>
+                        </div>
+                        <md-icon-button onclick="deleteRule('@rule.LogicId')" title="Delete rule">
+                            <md-icon style="color: var(--md-sys-color-error);">delete</md-icon>
+                        </md-icon-button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card-surface" style="padding: 48px; margin-bottom: 24px; border-radius: 12px; text-align: center;">
+            <span class="material-symbols-outlined" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5;">rule</span>
+            <h3 class="md-typescale-title-large" style="margin-top: 16px;">No logic rules yet</h3>
+            <p class="md-typescale-body-medium" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                Add conditional logic to control survey flow based on user responses
+            </p>
+        </div>
+    }
+
+    <!-- Add New Rule Form -->
+    <div class="card-surface" style="padding: 24px; border-radius: 12px;">
+        <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Add New Logic Rule</h2>
+        
+        @if (!Model.AllQuestions.Any(q => q.Options.Any()))
+        {
+            <div class="alert" style="padding: 16px; background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); border-radius: 8px; margin-bottom: 16px;">
+                <h3 class="md-typescale-title-medium" style="margin-bottom: 8px;">⚠️ No Questions with Options</h3>
+                <p>You need to add questions with options (Multiple Choice, Checkboxes, or Dropdown) before creating logic rules.</p>
+                <md-filled-button onclick="window.location.href='@Url.Action("Index", "SurveyDesigner", new { id = Model.SurveyId })'" style="margin-top: 12px;">
+                    <md-icon slot="icon">edit_note</md-icon>
+                    Go to Designer
+                </md-filled-button>
+            </div>
+        }
+        else
+        {
+            <form asp-action="AddRule" asp-controller="BranchLogic" method="post" id="addRuleForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="SurveyId" value="@Model.SurveyId" />
+
+                <!-- Step 1: Select Source Question -->
+                <div class="form-row" style="margin-bottom: 16px;">
+                    <label class="md-typescale-title-small" style="margin-bottom: 8px; display: block;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">filter_1</span>
+                        IF this question is answered
+                    </label>
+                    <select name="SourceQuestionId" id="sourceQuestionSelect" class="form-select" required 
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="">-- Select a question --</option>
+                        @foreach (var q in Model.AllQuestions.Where(q => q.Options.Any()).OrderBy(q => q.QuestionOrder))
+                        {
+                            var optionsJson = System.Text.Json.JsonSerializer.Serialize(q.Options);
+                            <option value="@q.QuestionId" data-options='@Html.Raw(optionsJson)'>
+                                Q@(q.QuestionOrder): @q.QuestionText
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Step 2: Select Answer Option -->
+                <div class="form-row" id="optionSelectRow" style="display: none; margin-bottom: 16px;">
+                    <label class="md-typescale-title-small" style="margin-bottom: 8px; display: block;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">filter_2</span>
+                        With this specific answer
+                    </label>
+                    <select name="SourceOptionId" id="optionSelect" class="form-select" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="">-- Select an answer --</option>
+                    </select>
+                </div>
+
+                <!-- Step 3: Select Action -->
+                <div class="form-row" id="actionSelectRow" style="display: none; margin-bottom: 16px;">
+                    <label class="md-typescale-title-small" style="margin-bottom: 8px; display: block;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">filter_3</span>
+                        THEN perform this action
+                    </label>
+                    <select name="TargetAction" id="targetActionSelect" class="form-select" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="">-- Select an action --</option>
+                        <option value="ShowQuestion">🎯 Jump to specific question</option>
+                        <option value="SkipQuestion">⏭️ Skip to specific question</option>
+                        <option value="EndSurvey">🏁 End survey immediately</option>
+                    </select>
+                </div>
+
+                <!-- Step 4: Select Target Question (if needed) -->
+                <div class="form-row" id="targetQuestionRow" style="display: none; margin-bottom: 16px;">
+                    <label class="md-typescale-title-small" style="margin-bottom: 8px; display: block;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">filter_4</span>
+                        Select target question
+                    </label>
+                    <select name="TargetQuestionId" id="targetQuestionSelect" class="form-select"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="">-- Select a question --</option>
+                        @foreach (var q in Model.AllQuestions.OrderBy(q => q.QuestionOrder))
+                        {
+                            <option value="@q.QuestionId">Q@(q.QuestionOrder): @q.QuestionText</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <md-text-button type="button" onclick="window.location.href='@Url.Action("Index", "SurveyDesigner", new { id = Model.SurveyId })'">
+                        Cancel
+                    </md-text-button>
+                    <md-filled-button type="button" onclick="validateAndSubmit()">
+                        <md-icon slot="icon">add</md-icon>
+                        Add Logic Rule
+                    </md-filled-button>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+<style>
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        console.log('=== Logic Form Script Loaded ===');
+        
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const sourceQuestionSelect = document.getElementById('sourceQuestionSelect');
+            const optionSelect = document.getElementById('optionSelect');
+            const optionRow = document.getElementById('optionSelectRow');
+            const actionRow = document.getElementById('actionSelectRow');
+            const targetActionSelect = document.getElementById('targetActionSelect');
+            const targetQuestionRow = document.getElementById('targetQuestionRow');
+            const targetQuestionSelect = document.getElementById('targetQuestionSelect');
+            
+            // Step 1: When source question is selected
+            sourceQuestionSelect.addEventListener('change', function() {
+                console.log('Source question changed:', this.value);
+                
+                // Reset subsequent fields
+                optionSelect.value = '';
+                targetActionSelect.value = '';
+                targetQuestionSelect.value = '';
+                actionRow.style.display = 'none';
+                targetQuestionRow.style.display = 'none';
+                
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const optionsData = selectedOption.getAttribute('data-options');
+                    
+                    console.log('Options data:', optionsData);
+                    
+                    if (optionsData) {
+                        try {
+                            const options = JSON.parse(optionsData);
+                            console.log('Parsed options:', options);
+                            
+                            // Clear and rebuild options
+                            optionSelect.innerHTML = '<option value="">-- Select an answer --</option>';
+                            
+                            options.forEach(function(opt) {
+                                const option = document.createElement('option');
+                                option.value = opt.optionId || opt.OptionId;
+                                option.textContent = opt.optionText || opt.OptionText;
+                                optionSelect.appendChild(option);
+                                console.log('Added option:', opt);
+                            });
+                            
+                            optionRow.style.display = 'block';
+                        } catch (e) {
+                            console.error('Error parsing options:', e);
+                            alert('Error loading options. Please refresh the page.');
+                        }
+                    }
+                } else {
+                    optionRow.style.display = 'none';
+                }
+            });
+            
+            // Step 2: When option is selected
+            optionSelect.addEventListener('change', function() {
+                console.log('Option selected:', this.value);
+                
+                if (this.value) {
+                    actionRow.style.display = 'block';
+                } else {
+                    actionRow.style.display = 'none';
+                    targetQuestionRow.style.display = 'none';
+                }
+            });
+            
+            // Step 3: When action is selected
+            targetActionSelect.addEventListener('change', function() {
+                console.log('Action selected:', this.value);
+                
+                if (this.value === 'ShowQuestion' || this.value === 'SkipQuestion') {
+                    targetQuestionRow.style.display = 'block';
+                    targetQuestionSelect.required = true;
+                } else {
+                    targetQuestionRow.style.display = 'none';
+                    targetQuestionSelect.required = false;
+                    targetQuestionSelect.value = '';
+                }
+            });
+        });
+
+        // Validate and submit function
+        function validateAndSubmit() {
+            const form = document.getElementById('addRuleForm');
+            const sourceQuestionId = document.getElementById('sourceQuestionSelect').value;
+            const sourceOptionId = document.getElementById('optionSelect').value;
+            const targetAction = document.getElementById('targetActionSelect').value;
+            const targetQuestionId = document.getElementById('targetQuestionSelect').value;
+            
+            console.log('=== Form Validation ===');
+            console.log('SourceQuestionId:', sourceQuestionId);
+            console.log('SourceOptionId:', sourceOptionId);
+            console.log('TargetAction:', targetAction);
+            console.log('TargetQuestionId:', targetQuestionId);
+            
+            // Validate required fields
+            if (!sourceQuestionId) {
+                alert('Please select a source question');
+                return false;
+            }
+            
+            if (!sourceOptionId) {
+                alert('Please select an answer option');
+                return false;
+            }
+            
+            if (!targetAction) {
+                alert('Please select an action');
+                return false;
+            }
+            
+            if ((targetAction === 'ShowQuestion' || targetAction === 'SkipQuestion') && !targetQuestionId) {
+                alert('Please select a target question');
+                return false;
+            }
+            
+            // Verify GUID format
+            const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            
+            if (!guidRegex.test(sourceQuestionId)) {
+                alert('Invalid source question ID');
+                return false;
+            }
+            
+            if (!guidRegex.test(sourceOptionId)) {
+                alert('Invalid option ID');
+                console.error('Invalid sourceOptionId:', sourceOptionId);
+                return false;
+            }
+            
+            console.log('Validation passed, submitting form...');
+            form.submit();
+        }
+
+        // Delete rule function
+        async function deleteRule(logicId) {
+            if (!confirm('Are you sure you want to delete this logic rule?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/BranchLogic/DeleteRule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ logicId: logicId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Failed to delete rule');
+                }
+            } catch (error) {
+                console.error('Error deleting rule:', error);
+                alert('Failed to delete rule');
+            }
+        }
+    </script>
+}

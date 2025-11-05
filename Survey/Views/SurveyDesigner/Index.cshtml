@@ -1,4 +1,4 @@
-@model SurveyDesignerViewModel
+﻿@model SurveyDesignerViewModel
 @{
     ViewData["Title"] = "Design Survey - " + Model.SurveyTitle;
 }
@@ -18,6 +18,12 @@
             </div>
         </div>
         <div style="display: flex; gap: 12px;">
+            <!-- THÊM NÚT LOGIC Ở ĐÂY -->
+            <md-outlined-button onclick="window.location.href='@Url.Action("Index", "BranchLogic", new { id = Model.SurveyId })'">
+                <md-icon slot="icon">rule</md-icon>
+                Logic Rules
+            </md-outlined-button>
+            
             <md-outlined-button onclick="previewSurvey()">
                 <md-icon slot="icon">visibility</md-icon>
                 Preview

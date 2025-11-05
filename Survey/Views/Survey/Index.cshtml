@@ -1,4 +1,4 @@
-@model MySurveysViewModel
+﻿@model MySurveysViewModel
 @{
     ViewData["Title"] = "My Surveys";
 }
@@ -146,6 +146,13 @@
                                 <span class="material-symbols-outlined" slot="icon">edit_note</span>
                                 Design
                             </md-filled-tonal-button>
+                            
+                            @* THÊM NÚT LOGIC Ở ĐÂY 
+                            <md-outlined-button onclick="window.location.href='@Url.Action("Index", "BranchLogic", new { id = survey.SurveyId })'">
+                                <span class="material-symbols-outlined" slot="icon">rule</span>
+                                Logic
+                            </md-outlined-button>
+                            *@
                         }
 
                         @* Settings button - Available for Owner and Editor *@
