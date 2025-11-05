@@ -14,6 +14,10 @@ builder.Services.AddDbContext<SurveyDbContext>(options =>
 
 // Đăng ký Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISurveyRepository, SurveyRepository>();
+builder.Services.AddScoped<ISurveyCollaboratorRepository, SurveyCollaboratorRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IQuestionOptionRepository, QuestionOptionRepository>();
 
 // Đăng ký Security Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -22,28 +26,29 @@ builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 // Đăng ký Service
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISurveyCollaboratorService, SurveyCollaboratorService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<ISurveyDesignerService, SurveyDesignerService>();
 
-// Thêm Session (nếu cần)
+// Thêm Session
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Require HTTPS
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 // Thêm HttpClient cho RecaptchaService
 builder.Services.AddHttpClient<ICaptchaService, RecaptchaService>();
-
-// Đăng ký ICaptchaService
 builder.Services.AddScoped<ICaptchaService, RecaptchaService>();
 
-// Configure HSTS (HTTP Strict Transport Security)
+// Configure HSTS
 builder.Services.AddHsts(options =>
 {
     options.Preload = true;
     options.IncludeSubDomains = true;
-    options.MaxAge = TimeSpan.FromDays(365); // 1 year
+    options.MaxAge = TimeSpan.FromDays(365);
 });
 
 var app = builder.Build();
@@ -52,17 +57,15 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // Enable HSTS in production
     app.UseHsts();
 }
 
-// Force HTTPS redirection
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession(); // Thêm middleware Session
+app.UseSession();
 
 app.UseAuthorization();
 

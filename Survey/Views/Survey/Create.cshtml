@@ -1,0 +1,94 @@
+@model CreateSurveyDto
+@{
+    ViewData["Title"] = "Create New Survey";
+}
+
+<div class="container" style="max-width: 800px; padding: 24px;">
+    <div class="card-surface" style="padding: 32px; border-radius: 12px;">
+        <h1 class="md-typescale-display-small" style="margin-bottom: 8px;">Create New Survey</h1>
+        <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 32px;">
+            Start by giving your survey a title and description
+        </p>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-error" style="padding: 12px; margin-bottom: 16px; background-color: rgba(179, 38, 30, 0.1); color: var(--md-sys-color-error); border-radius: 8px;">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-error" style="padding: 12px; margin-bottom: 16px; background-color: rgba(179, 38, 30, 0.1); color: var(--md-sys-color-error); border-radius: 8px;">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Create" asp-controller="Survey" method="post" novalidate id="createSurveyForm">
+            @Html.AntiForgeryToken()
+            
+            <div class="form-row">
+                <md-outlined-text-field 
+                    label="Survey Title"
+                    name="Title"
+                    value="@Model.Title"
+                    required
+                    style="width: 100%;">
+                </md-outlined-text-field>
+                <span asp-validation-for="Title" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row">
+                <label class="md-typescale-body-large" style="display: block; margin-bottom: 8px;">Description (Optional)</label>
+                <textarea 
+                    name="Description"
+                    rows="4"
+                    style="width: 100%; padding: 16px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-family: Roboto; font-size: 16px; background: var(--md-sys-color-surface);"
+                    placeholder="Describe the purpose of your survey...">@Model.Description</textarea>
+                <span asp-validation-for="Description" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row" style="display: flex; align-items: center; gap: 12px;">
+                <!-- Hidden input that will be submitted -->
+                <input type="hidden" name="IsAnonymous" id="IsAnonymousValue" value="false" />
+                
+                <!-- Material checkbox for display only -->
+                <md-checkbox id="IsAnonymousCheckbox" @(Model.IsAnonymous ? "checked" : "") touch-target="wrapper"></md-checkbox>
+                <label for="IsAnonymousCheckbox" class="md-typescale-body-medium" style="cursor: pointer;">
+                    Anonymous Survey (Do not collect respondent information)
+                </label>
+            </div>
+
+            <div class="form-actions" style="margin-top: 32px;">
+                <md-filled-button type="submit">
+                    <span class="material-symbols-outlined" slot="icon">check</span>
+                    Create Survey
+                </md-filled-button>
+                <md-text-button type="button" onclick="window.location.href='@Url.Action("Index","Survey")'">
+                    Cancel
+                </md-text-button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkbox = document.getElementById('IsAnonymousCheckbox');
+            const hiddenInput = document.getElementById('IsAnonymousValue');
+            
+            if (checkbox && hiddenInput) {
+                // Set initial value based on checkbox state
+                hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                
+                // Update hidden input when checkbox changes
+                checkbox.addEventListener('change', function() {
+                    hiddenInput.value = this.checked ? 'true' : 'false';
+                    console.log('IsAnonymous value set to:', hiddenInput.value);
+                });
+            }
+        });
+    </script>
+}

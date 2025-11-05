@@ -1,0 +1,185 @@
+@model SurveySettingsViewModel
+@{
+    ViewData["Title"] = "Survey Settings";
+}
+
+<section class="card-surface" style="max-width: 900px; margin: 24px auto; padding: 24px;">
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+        <md-icon-button href="@Url.Action("Index", "Survey")">
+            <md-icon>arrow_back</md-icon>
+        </md-icon-button>
+        <h1 class="md-typescale-headline-medium" style="margin: 0;">Survey Settings</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success md-typescale-body-medium" style="margin-bottom: 24px; padding: 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 12px;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-error md-typescale-body-medium" style="margin-bottom: 24px; padding: 16px; background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); border-radius: 12px;">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Survey Info -->
+    <div style="margin-bottom: 24px; padding: 16px; background-color: var(--md-sys-color-surface-variant); border-radius: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <div class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Created</div>
+                <div class="md-typescale-body-medium">@Model.CreatedAtUtc.ToLocalTime().ToString("MMM dd, yyyy")</div>
+            </div>
+            <div>
+                <div class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Last Updated</div>
+                <div class="md-typescale-body-medium">@Model.UpdatedAtUtc.ToLocalTime().ToString("MMM dd, yyyy")</div>
+            </div>
+            <div>
+                <div class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Questions</div>
+                <div class="md-typescale-body-medium">@Model.QuestionCount</div>
+            </div>
+            <div>
+                <div class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Responses</div>
+                <div class="md-typescale-body-medium">@Model.ResponseCount</div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Settings" asp-controller="Survey" method="post" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="SurveyId" />
+
+        <!-- Basic Information -->
+        <div style="margin-bottom: 32px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Basic Information</h2>
+            
+            <div class="form-row">
+                <md-outlined-text-field label="Survey Title"
+                                        name="Title"
+                                        value="@Model.Title"
+                                        required
+                                        maxlength="255"
+                                        style="width: 100%;">
+                </md-outlined-text-field>
+                <span asp-validation-for="Title" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row">
+                <md-outlined-text-field label="Description"
+                                        name="Description"
+                                        value="@Model.Description"
+                                        type="textarea"
+                                        rows="4"
+                                        maxlength="2000"
+                                        style="width: 100%;">
+                </md-outlined-text-field>
+                <span asp-validation-for="Description" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row">
+                <md-outlined-text-field label="Default Language"
+                                        name="DefaultLanguage"
+                                        value="@Model.DefaultLanguage"
+                                        placeholder="e.g., en, vi"
+                                        style="width: 100%;">
+                </md-outlined-text-field>
+                <span asp-validation-for="DefaultLanguage" class="text-danger md-typescale-body-small"></span>
+            </div>
+        </div>
+
+        <!-- Survey Status & Privacy -->
+        <div style="margin-bottom: 32px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Status & Privacy</h2>
+            
+            <div class="form-row">
+                <label class="md-typescale-body-medium" style="margin-bottom: 8px; display: block;">Survey Status</label>
+                <select name="Status" class="form-select" style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;">
+                    <option value="Draft" selected="@(Model.Status == "Draft")">Draft</option>
+                    <option value="Published" selected="@(Model.Status == "Published")">Published</option>
+                    <option value="Closed" selected="@(Model.Status == "Closed")">Closed</option>
+                    <option value="Archived" selected="@(Model.Status == "Archived")">Archived</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row">
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <md-checkbox name="IsAnonymous" value="true" @(Model.IsAnonymous ? "checked" : "")></md-checkbox>
+                    <span class="md-typescale-body-medium">Allow anonymous responses</span>
+                </label>
+                <input type="hidden" name="IsAnonymous" value="false" />
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div style="margin-bottom: 32px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Schedule</h2>
+            
+            <div class="form-row">
+                <label class="md-typescale-body-medium" style="margin-bottom: 8px; display: block;">Opening Date (UTC)</label>
+                <input type="datetime-local" 
+                       name="OpenAtUtc" 
+                       value="@Model.OpenAtUtc?.ToString("yyyy-MM-ddTHH:mm")"
+                       class="form-control"
+                       style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" />
+                <span asp-validation-for="OpenAtUtc" class="text-danger md-typescale-body-small"></span>
+            </div>
+
+            <div class="form-row">
+                <label class="md-typescale-body-medium" style="margin-bottom: 8px; display: block;">Closing Date (UTC)</label>
+                <input type="datetime-local" 
+                       name="CloseAtUtc" 
+                       value="@Model.CloseAtUtc?.ToString("yyyy-MM-ddTHH:mm")"
+                       class="form-control"
+                       style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" />
+                <span asp-validation-for="CloseAtUtc" class="text-danger md-typescale-body-small"></span>
+            </div>
+        </div>
+
+        <!-- Response Limits -->
+        <div style="margin-bottom: 32px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Response Limits</h2>
+            
+            <div class="form-row">
+                <md-outlined-text-field label="Response Quota (Optional)"
+                                        name="ResponseQuota"
+                                        type="number"
+                                        value="@Model.ResponseQuota"
+                                        min="1"
+                                        style="width: 100%;">
+                </md-outlined-text-field>
+                <span asp-validation-for="ResponseQuota" class="text-danger md-typescale-body-small"></span>
+                <div class="md-typescale-body-small" style="margin-top: 4px; color: var(--md-sys-color-on-surface-variant);">
+                    Leave empty for unlimited responses
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label class="md-typescale-body-medium" style="margin-bottom: 8px; display: block;">Quota Behavior</label>
+                <select name="QuotaBehavior" class="form-select" style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.QuotaBehavior))">No Action</option>
+                    <option value="CloseSurvey" selected="@(Model.QuotaBehavior == "CloseSurvey")">Close Survey</option>
+                    <option value="ShowMessage" selected="@(Model.QuotaBehavior == "ShowMessage")">Show Message Only</option>
+                </select>
+                <span asp-validation-for="QuotaBehavior" class="text-danger md-typescale-body-small"></span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions" style="display: flex; gap: 12px; justify-content: flex-end;">
+            <md-text-button type="button" onclick="window.location.href='@Url.Action("Index","Survey")'">
+                Cancel
+            </md-text-button>
+            <md-filled-button type="submit">
+                <md-icon slot="icon">save</md-icon>
+                Save Settings
+            </md-filled-button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,101 @@
+@model SurveyDesignerViewModel
+@{
+    ViewData["Title"] = "Design Survey - " + Model.SurveyTitle;
+}
+
+<div class="container" style="max-width: 1200px; padding: 24px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <md-icon-button href="@Url.Action("Index", "Survey")">
+                <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div>
+                <h1 class="md-typescale-display-small">@Model.SurveyTitle</h1>
+                <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                    Design your survey questions
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <md-outlined-button onclick="previewSurvey()">
+                <md-icon slot="icon">visibility</md-icon>
+                Preview
+            </md-outlined-button>
+            <md-filled-button onclick="window.location.href='@Url.Action("Index", "Survey")'">
+                <md-icon slot="icon">check</md-icon>
+                Done
+            </md-filled-button>
+        </div>
+    </div>
+
+    <!-- Survey Info Card -->
+    <div class="card-surface" style="padding: 16px; margin-bottom: 24px; border-radius: 12px;">
+        <div style="display: flex; gap: 24px; align-items: center;">
+            <div>
+                <span class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Status</span>
+                <div class="md-typescale-body-medium">@Model.Status</div>
+            </div>
+            <div>
+                <span class="md-typescale-label-small" style="color: var(--md-sys-color-on-surface-variant);">Questions</span>
+                <div class="md-typescale-body-medium" id="questionCount">@Model.Questions.Count</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+        @foreach (var question in Model.Questions.OrderBy(q => q.QuestionOrder))
+        {
+            <div class="question-card card-surface" data-question-id="@question.QuestionId" data-question-order="@question.QuestionOrder" style="padding: 24px; border-radius: 12px; position: relative;">
+                @await Html.PartialAsync("_QuestionCard", question)
+            </div>
+        }
+    </div>
+
+    <!-- Add Question Menu -->
+    <div class="card-surface" style="padding: 16px; border-radius: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="md-typescale-body-medium" style="margin-right: 8px;">Add question:</span>
+            <md-outlined-button onclick="addQuestion('ShortText')">
+                <md-icon slot="icon">short_text</md-icon>
+                Short Text
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('LongText')">
+                <md-icon slot="icon">subject</md-icon>
+                Long Text
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('MultipleChoice')">
+                <md-icon slot="icon">radio_button_checked</md-icon>
+                Multiple Choice
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('Checkboxes')">
+                <md-icon slot="icon">check_box</md-icon>
+                Checkboxes
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('Dropdown')">
+                <md-icon slot="icon">arrow_drop_down_circle</md-icon>
+                Dropdown
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('RatingScale')">
+                <md-icon slot="icon">star</md-icon>
+                Rating
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('Date')">
+                <md-icon slot="icon">calendar_today</md-icon>
+                Date
+            </md-outlined-button>
+            <md-outlined-button onclick="addQuestion('Email')">
+                <md-icon slot="icon">email</md-icon>
+                Email
+            </md-outlined-button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden input for survey ID -->
+<input type="hidden" id="surveyId" value="@Model.SurveyId" />
+
+@section Scripts {
+    <script src="~/js/survey-designer.js" asp-append-version="true"></script>
+}

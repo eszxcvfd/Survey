@@ -1,0 +1,121 @@
+@model QuestionViewModel
+
+<div class="question-content">
+    <!-- Question Header -->
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <md-icon-button class="drag-handle" style="cursor: move;">
+                    <md-icon>drag_indicator</md-icon>
+                </md-icon-button>
+                <span class="md-typescale-label-large" style="color: var(--md-sys-color-primary);">
+                    Question @Model.QuestionOrder
+                </span>
+                <span class="question-type-badge" style="padding: 4px 12px; background-color: var(--md-sys-color-surface-variant); border-radius: 16px; font-size: 12px;">
+                    @Model.QuestionType
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <md-icon-button onclick="duplicateQuestion('@Model.QuestionId')" title="Duplicate">
+                <md-icon>content_copy</md-icon>
+            </md-icon-button>
+            <md-icon-button onclick="deleteQuestion('@Model.QuestionId')" title="Delete" style="color: var(--md-sys-color-error);">
+                <md-icon>delete</md-icon>
+            </md-icon-button>
+        </div>
+    </div>
+
+    <!-- Question Text -->
+    <div class="form-row" style="margin-bottom: 16px;">
+        <md-outlined-text-field 
+            class="question-text-input"
+            label="Question"
+            value="@Model.QuestionText"
+            required
+            style="width: 100%;"
+            onchange="updateQuestion('@Model.QuestionId')">
+        </md-outlined-text-field>
+    </div>
+
+    <!-- Options for choice-based questions -->
+    @if (Model.QuestionType == "MultipleChoice" || Model.QuestionType == "Checkboxes" || Model.QuestionType == "Dropdown" || Model.QuestionType == "RatingScale")
+    {
+        <div class="options-container" style="margin-bottom: 16px;">
+            <div class="md-typescale-label-medium" style="margin-bottom: 12px;">Options:</div>
+            <div class="options-list" style="display: flex; flex-direction: column; gap: 8px;">
+                @for (int i = 0; i < Model.Options.Count; i++)
+                {
+                    var option = Model.Options[i];
+                    <div class="option-item" data-option-id="@option.OptionId" style="display: flex; align-items: center; gap: 8px;">
+                        <md-icon style="color: var(--md-sys-color-on-surface-variant);">
+                            @(Model.QuestionType == "MultipleChoice" ? "radio_button_unchecked" : 
+                              Model.QuestionType == "Checkboxes" ? "check_box_outline_blank" : 
+                              "remove")
+                        </md-icon>
+                        <md-outlined-text-field 
+                            class="option-text-input"
+                            value="@option.OptionText"
+                            placeholder="Option @(i + 1)"
+                            style="flex: 1;"
+                            onchange="updateQuestion('@Model.QuestionId')">
+                        </md-outlined-text-field>
+                        <md-icon-button onclick="removeOption(this)" title="Remove option">
+                            <md-icon>close</md-icon>
+                        </md-icon-button>
+                    </div>
+                }
+            </div>
+            <md-text-button onclick="addOption('@Model.QuestionId')" style="margin-top: 8px;">
+                <md-icon slot="icon">add</md-icon>
+                Add option
+            </md-text-button>
+        </div>
+    }
+
+    <!-- Help Text -->
+    <div class="form-row" style="margin-bottom: 16px;">
+        <md-outlined-text-field 
+            class="help-text-input"
+            label="Help text (optional)"
+            value="@Model.HelpText"
+            style="width: 100%;"
+            onchange="updateQuestion('@Model.QuestionId')">
+        </md-outlined-text-field>
+    </div>
+
+    <!-- Question Settings -->
+    <div style="display: flex; gap: 24px; align-items: center; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <md-checkbox class="required-checkbox" @(Model.IsRequired ? "checked" : "") onchange="updateQuestion('@Model.QuestionId')"></md-checkbox>
+            <span class="md-typescale-body-medium">Required</span>
+        </label>
+        
+        <md-text-button onclick="toggleAdvancedSettings('@Model.QuestionId')">
+            <md-icon slot="icon">settings</md-icon>
+            Advanced
+        </md-text-button>
+    </div>
+
+    <!-- Advanced Settings (Hidden by default) -->
+    <div class="advanced-settings" id="advanced-@Model.QuestionId" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+        <div class="form-row">
+            <md-outlined-text-field 
+                class="validation-rule-input"
+                label="Validation rule (optional)"
+                value="@Model.ValidationRule"
+                style="width: 100%;"
+                onchange="updateQuestion('@Model.QuestionId')">
+            </md-outlined-text-field>
+        </div>
+        <div class="form-row" style="margin-top: 12px;">
+            <md-outlined-text-field 
+                class="default-value-input"
+                label="Default value (optional)"
+                value="@Model.DefaultValue"
+                style="width: 100%;"
+                onchange="updateQuestion('@Model.QuestionId')">
+            </md-outlined-text-field>
+        </div>
+    </div>
+</div>
