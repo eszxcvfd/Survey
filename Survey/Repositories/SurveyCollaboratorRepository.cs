@@ -45,6 +45,13 @@ namespace Survey.Repositories
                 .AnyAsync(sc => sc.SurveyId == surveyId && sc.UserId == userId);
         }
 
+        public async Task<string?> GetRoleAsync(Guid surveyId, Guid userId)
+        {
+            var collaborator = await _context.SurveyCollaborators
+                .FirstOrDefaultAsync(sc => sc.SurveyId == surveyId && sc.UserId == userId);
+            return collaborator?.Role;
+        }
+
         public async Task AddAsync(SurveyCollaborator collaborator)
         {
             await _context.SurveyCollaborators.AddAsync(collaborator);

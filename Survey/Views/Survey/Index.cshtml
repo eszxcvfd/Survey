@@ -148,14 +148,14 @@
                             </md-filled-tonal-button>
                         }
 
-                        @* *** MỚI: Reports button *** *@
+                        @* Reports button - Available for Owner, Editor and Viewer *@
                         <md-outlined-button onclick="window.location.href='@Url.Action("Index", "Report", new { surveyId = survey.SurveyId })'">
                             <span class="material-symbols-outlined" slot="icon">analytics</span>
                             Reports
                         </md-outlined-button>
 
-                        @* Settings button - Available for Owner and Editor *@
-                        @if (survey.MyRole == "Owner" || survey.MyRole == "Editor")
+                        @* Settings button - ONLY for Owner *@
+                        @if (survey.MyRole == "Owner")
                         {
                             <md-outlined-button onclick="window.location.href='@Url.Action("Settings", "Survey", new { id = survey.SurveyId })'">
                                 <span class="material-symbols-outlined" slot="icon">settings</span>
@@ -163,17 +163,23 @@
                             </md-outlined-button>
                         }
 
-                        @* Collaborators management button *@
-                        <md-outlined-button onclick="window.location.href='@Url.Action("Manage", "SurveyCollaborator", new { surveyId = survey.SurveyId })'">
-                            <span class="material-symbols-outlined" slot="icon">group</span>
-                            Team
-                        </md-outlined-button>
+                        @* Team management button - ONLY for Owner *@
+                        @if (survey.MyRole == "Owner")
+                        {
+                            <md-outlined-button onclick="window.location.href='@Url.Action("Manage", "SurveyCollaborator", new { surveyId = survey.SurveyId })'">
+                                <span class="material-symbols-outlined" slot="icon">group</span>
+                                Team
+                            </md-outlined-button>
+                        }
                         
-                        @* Share button *@
-                        <md-outlined-button onclick="window.location.href='@Url.Action("Manage", "SurveyChannel", new { surveyId = survey.SurveyId })'">
-                            <span class="material-symbols-outlined" slot="icon">share</span>
-                            Share
-                        </md-outlined-button>
+                        @* Share button - ONLY for Owner *@
+                        @if (survey.MyRole == "Owner")
+                        {
+                            <md-outlined-button onclick="window.location.href='@Url.Action("Manage", "SurveyChannel", new { surveyId = survey.SurveyId })'">
+                                <span class="material-symbols-outlined" slot="icon">share</span>
+                                Share
+                            </md-outlined-button>
+                        }
 
                         @* Delete button - Only for Owner *@
                         @if (survey.MyRole == "Owner")

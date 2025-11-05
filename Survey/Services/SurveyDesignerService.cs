@@ -1,4 +1,4 @@
-using Survey.DTOs;
+﻿using Survey.DTOs;
 using Survey.Models;
 using Survey.Repositories;
 
@@ -28,33 +28,64 @@ namespace Survey.Services
 
         public async Task<SurveyDesignerViewModel?> GetSurveyForDesignerAsync(Guid surveyId, Guid currentUserId)
         {
-            _logger.LogInformation("Getting survey designer for survey {SurveyId}", surveyId);
+            _logger.LogInformation("=== GetSurveyForDesignerAsync START ===");
+            _logger.LogInformation("SurveyId: {SurveyId}, UserId: {UserId}", surveyId, currentUserId);
 
-            // Check permission
-            var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
-            if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
-            {
-                _logger.LogWarning("User {UserId} does not have permission to edit survey {SurveyId}", currentUserId, surveyId);
-                return null;
-            }
-
+            // Step 1: Get survey
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
             if (survey == null)
             {
+                _logger.LogWarning("Survey not found: {SurveyId}", surveyId);
+                return null;
+            }
+            _logger.LogInformation("Survey found: {Title}, OwnerId: {OwnerId}", survey.Title, survey.OwnerId);
+
+            // Step 2: Check if user is owner
+            var isOwner = survey.OwnerId == currentUserId;
+            _logger.LogInformation("Is user owner? {IsOwner}", isOwner);
+
+            if (isOwner)
+            {
+                _logger.LogInformation("User is OWNER - granting access");
+                var questions = await _questionRepository.GetBySurveyIdWithOptionsAsync(surveyId);
+
+                return new SurveyDesignerViewModel
+                {
+                    SurveyId = survey.SurveyId,
+                    SurveyTitle = survey.Title,
+                    Status = survey.Status,
+                    Questions = questions.Select(q => MapToQuestionViewModel(q)).ToList()
+                };
+            }
+
+            // Step 3: Check collaborator permissions
+            _logger.LogInformation("User is NOT owner - checking collaborators table");
+            var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
+            
+            if (collaboration == null)
+            {
+                _logger.LogWarning("No collaboration found for user {UserId} on survey {SurveyId}", currentUserId, surveyId);
                 return null;
             }
 
-            var questions = await _questionRepository.GetBySurveyIdWithOptionsAsync(surveyId);
+            _logger.LogInformation("Collaboration found: Role = {Role}", collaboration.Role);
 
-            var viewModel = new SurveyDesignerViewModel
+            if (collaboration.Role != "Owner" && collaboration.Role != "Editor")
+            {
+                _logger.LogWarning("User {UserId} has insufficient permissions. Role: {Role}", currentUserId, collaboration.Role);
+                return null;
+            }
+
+            _logger.LogInformation("User has EDITOR access - granting access");
+            var questionsForEditor = await _questionRepository.GetBySurveyIdWithOptionsAsync(surveyId);
+
+            return new SurveyDesignerViewModel
             {
                 SurveyId = survey.SurveyId,
                 SurveyTitle = survey.Title,
                 Status = survey.Status,
-                Questions = questions.Select(q => MapToQuestionViewModel(q)).ToList()
+                Questions = questionsForEditor.Select(q => MapToQuestionViewModel(q)).ToList()
             };
-
-            return viewModel;
         }
 
         public async Task<ServiceResult<QuestionViewModel>> AddQuestionAsync(Guid surveyId, string questionType, Guid currentUserId)
@@ -63,18 +94,14 @@ namespace Survey.Services
 
             try
             {
-                // Check permission
-                var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
+                if (!await HasEditPermissionAsync(surveyId, currentUserId))
                 {
                     return ServiceResult<QuestionViewModel>.FailureResult("You don't have permission to edit this survey");
                 }
 
-                // Get next order
                 var maxOrder = await _questionRepository.GetMaxOrderBySurveyIdAsync(surveyId);
                 var newOrder = maxOrder + 1;
 
-                // Create new question
                 var newQuestion = new Question
                 {
                     QuestionId = Guid.NewGuid(),
@@ -89,7 +116,6 @@ namespace Survey.Services
 
                 await _questionRepository.AddAsync(newQuestion);
 
-                // Add default options for choice-based questions
                 if (RequiresOptions(questionType))
                 {
                     var defaultOptions = new List<QuestionOption>
@@ -132,9 +158,7 @@ namespace Survey.Services
 
             try
             {
-                // Check permission
-                var collaboration = await _collaboratorRepository.GetAsync(model.SurveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
+                if (!await HasEditPermissionAsync(model.SurveyId, currentUserId))
                 {
                     return ServiceResult<QuestionViewModel>.FailureResult("You don't have permission to edit this survey");
                 }
@@ -145,7 +169,6 @@ namespace Survey.Services
                     return ServiceResult<QuestionViewModel>.FailureResult("Question not found");
                 }
 
-                // Update question properties
                 question.QuestionText = model.QuestionText;
                 question.QuestionType = model.QuestionType;
                 question.IsRequired = model.IsRequired;
@@ -156,14 +179,12 @@ namespace Survey.Services
 
                 await _questionRepository.UpdateAsync(question);
 
-                // Sync options if question type requires them
                 if (RequiresOptions(model.QuestionType))
                 {
                     await SyncOptionsAsync(model.QuestionId, model.Options);
                 }
                 else
                 {
-                    // Delete all options if question type doesn't need them
                     var existingOptions = await _optionRepository.GetByQuestionIdAsync(model.QuestionId);
                     if (existingOptions.Any())
                     {
@@ -171,7 +192,6 @@ namespace Survey.Services
                     }
                 }
 
-                // Reload question with options
                 var updatedQuestion = await _questionRepository.GetByIdWithOptionsAsync(model.QuestionId);
                 var viewModel = MapToQuestionViewModel(updatedQuestion!);
 
@@ -196,16 +216,12 @@ namespace Survey.Services
                     return ServiceResult.FailureResult("Question not found");
                 }
 
-                // Check permission
-                var collaboration = await _collaboratorRepository.GetAsync(question.SurveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
+                if (!await HasEditPermissionAsync(question.SurveyId, currentUserId))
                 {
                     return ServiceResult.FailureResult("You don't have permission to edit this survey");
                 }
 
-                // Delete question (options will be cascade deleted by database)
                 await _questionRepository.DeleteAsync(questionId);
-
                 return ServiceResult.SuccessResult("Question deleted successfully");
             }
             catch (Exception ex)
@@ -221,9 +237,7 @@ namespace Survey.Services
 
             try
             {
-                // Check permission
-                var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
+                if (!await HasEditPermissionAsync(surveyId, currentUserId))
                 {
                     return ServiceResult.FailureResult("You don't have permission to edit this survey");
                 }
@@ -250,6 +264,41 @@ namespace Survey.Services
             }
         }
 
+        // ✅ Helper method
+        private async Task<bool> HasEditPermissionAsync(Guid surveyId, Guid userId)
+        {
+            _logger.LogInformation("=== HasEditPermissionAsync ===");
+            _logger.LogInformation("SurveyId: {SurveyId}, UserId: {UserId}", surveyId, userId);
+
+            var survey = await _surveyRepository.GetByIdAsync(surveyId);
+            if (survey == null)
+            {
+                _logger.LogWarning("Survey not found");
+                return false;
+            }
+
+            // Check owner
+            if (survey.OwnerId == userId)
+            {
+                _logger.LogInformation("User is OWNER - has edit permission");
+                return true;
+            }
+
+            // Check collaborator
+            var collaboration = await _collaboratorRepository.GetAsync(surveyId, userId);
+            if (collaboration == null)
+            {
+                _logger.LogWarning("No collaboration found");
+                return false;
+            }
+
+            var hasPermission = collaboration.Role == "Owner" || collaboration.Role == "Editor";
+            _logger.LogInformation("Collaboration role: {Role}, Has permission: {HasPermission}", 
+                collaboration.Role, hasPermission);
+
+            return hasPermission;
+        }
+
         // Private helper methods
 
         private async Task SyncOptionsAsync(Guid questionId, List<QuestionOptionViewModel> newOptions)
@@ -258,14 +307,12 @@ namespace Survey.Services
             var existingOptionIds = existingOptions.Select(o => o.OptionId).ToHashSet();
             var newOptionIds = newOptions.Where(o => o.OptionId != Guid.Empty).Select(o => o.OptionId).ToHashSet();
 
-            // Delete removed options
             var optionsToDelete = existingOptions.Where(o => !newOptionIds.Contains(o.OptionId)).Select(o => o.OptionId).ToList();
             if (optionsToDelete.Any())
             {
                 await _optionRepository.DeleteRangeAsync(optionsToDelete);
             }
 
-            // Add or update options
             for (int i = 0; i < newOptions.Count; i++)
             {
                 var optionViewModel = newOptions[i];
@@ -273,7 +320,6 @@ namespace Survey.Services
 
                 if (optionViewModel.OptionId == Guid.Empty || !existingOptionIds.Contains(optionViewModel.OptionId))
                 {
-                    // Add new option
                     var newOption = new QuestionOption
                     {
                         OptionId = Guid.NewGuid(),
@@ -287,7 +333,6 @@ namespace Survey.Services
                 }
                 else
                 {
-                    // Update existing option
                     var existingOption = existingOptions.First(o => o.OptionId == optionViewModel.OptionId);
                     existingOption.OptionText = optionViewModel.OptionText;
                     existingOption.OptionValue = optionViewModel.OptionValue;

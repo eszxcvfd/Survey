@@ -1,0 +1,304 @@
+/* ============================================
+   DARK THEME - Material Design 3
+   ============================================ */
+
+/* Dark Theme Color Variables */
+body.dark-theme {
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-on-primary-container: #EADDFF;
+    
+    --md-sys-color-secondary: #CCC2DC;
+    --md-sys-color-on-secondary: #332D41;
+    --md-sys-color-secondary-container: #4A4458;
+    --md-sys-color-on-secondary-container: #E8DEF8;
+    
+    --md-sys-color-tertiary: #EFB8C8;
+    --md-sys-color-on-tertiary: #492532;
+    --md-sys-color-tertiary-container: #3A3048;
+    --md-sys-color-on-tertiary-container: #E8DEF8;
+    
+    --md-sys-color-surface: #1C1B1F;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-surface-variant: #49454F;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    --md-sys-color-surface-container: #211F26;
+    --md-sys-color-surface-container-high: #2B2930;
+    --md-sys-color-surface-container-highest: #36343B;
+    
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-outline-variant: #49454F;
+    --md-sys-color-background: #1C1B1F;
+    
+    --md-sys-color-error: #F2B8B5;
+    --md-sys-color-on-error: #601410;
+    --md-sys-color-error-container: #8C1D18;
+    --md-sys-color-on-error-container: #F9DEDC;
+}
+
+/* Navigation Drawer - Dark */
+body.dark-theme .navigation-drawer {
+    background-color: var(--md-sys-color-surface);
+    border-right-color: var(--md-sys-color-outline-variant);
+}
+
+body.dark-theme .nav-item {
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+body.dark-theme .nav-item:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+body.dark-theme .nav-item.active {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* Cards - Dark */
+body.dark-theme .card-surface,
+body.dark-theme .surface-card {
+    background: var(--md-sys-color-surface-container);
+    border-color: var(--md-sys-color-outline-variant);
+}
+
+body.dark-theme .card-surface:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+/* User Menu - Dark */
+body.dark-theme .user-menu {
+    background: var(--md-sys-color-surface-container-high);
+    border-color: var(--md-sys-color-outline-variant);
+}
+
+body.dark-theme .menu-item {
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme .menu-item:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+body.dark-theme .user-profile:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+body.dark-theme .menu-user-name {
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme .menu-user-email {
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Footer - Dark */
+body.dark-theme .footer {
+    background-color: var(--md-sys-color-surface);
+    border-top-color: var(--md-sys-color-outline-variant);
+}
+
+/* Toast Notifications - Dark */
+body.dark-theme .toast {
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme .toast-success {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+body.dark-theme .toast-info {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+/* Posters/Hero sections - Dark */
+body.dark-theme .hero,
+body.dark-theme .auth-hero {
+    background: 
+        radial-gradient(ellipse 1200px 500px at -10% -30%, rgba(79, 55, 139, 0.4) 0%, transparent 70%),
+        radial-gradient(ellipse 1000px 600px at 110% 110%, rgba(79, 55, 139, 0.3) 0%, transparent 60%),
+        linear-gradient(135deg, #1C1B1F 0%, #2B2930 100%);
+}
+
+body.dark-theme .poster-home {
+    background: 
+        radial-gradient(ellipse 1200px 500px at -10% -30%, rgba(208, 188, 255, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 1000px 600px at 110% 110%, rgba(208, 188, 255, 0.1) 0%, transparent 60%),
+        linear-gradient(135deg, #1C1B1F 0%, #2B2930 100%);
+}
+
+/* Forms - Dark */
+body.dark-theme md-outlined-text-field {
+    --md-outlined-text-field-outline-color: var(--md-sys-color-outline);
+    --md-outlined-text-field-focus-outline-color: var(--md-sys-color-primary);
+    --md-outlined-text-field-hover-outline-color: var(--md-sys-color-outline-variant);
+    --md-outlined-text-field-label-text-color: var(--md-sys-color-on-surface-variant);
+    --md-outlined-text-field-focus-label-text-color: var(--md-sys-color-primary);
+    --md-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
+}
+
+/* ============================================
+   SELECT/DROPDOWN - Dark Mode Fix
+   ============================================ */
+
+/* Standard HTML select elements */
+body.dark-theme select,
+body.dark-theme .form-select {
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    border-color: var(--md-sys-color-outline);
+}
+
+body.dark-theme select:hover,
+body.dark-theme .form-select:hover {
+    border-color: var(--md-sys-color-primary);
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+body.dark-theme select:focus,
+body.dark-theme .form-select:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: 2px solid var(--md-sys-color-primary);
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Options inside select dropdown */
+body.dark-theme select option,
+body.dark-theme .form-select option {
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    padding: 8px;
+}
+
+body.dark-theme select option:hover,
+body.dark-theme .form-select option:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+body.dark-theme select option:checked,
+body.dark-theme .form-select option:checked {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* Input fields */
+body.dark-theme input[type="text"],
+body.dark-theme input[type="email"],
+body.dark-theme input[type="password"],
+body.dark-theme input[type="number"],
+body.dark-theme input[type="date"],
+body.dark-theme textarea {
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    border-color: var(--md-sys-color-outline);
+}
+
+body.dark-theme input[type="text"]:focus,
+body.dark-theme input[type="email"]:focus,
+body.dark-theme input[type="password"]:focus,
+body.dark-theme input[type="number"]:focus,
+body.dark-theme input[type="date"]:focus,
+body.dark-theme textarea:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: 2px solid var(--md-sys-color-primary);
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Placeholder text */
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder {
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.7;
+}
+
+/* Buttons - Dark */
+body.dark-theme md-filled-button {
+    --md-filled-button-container-color: var(--md-sys-color-primary);
+    --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
+}
+
+body.dark-theme md-outlined-button {
+    --md-outlined-button-outline-color: var(--md-sys-color-outline);
+    --md-outlined-button-label-text-color: var(--md-sys-color-primary);
+}
+
+body.dark-theme md-text-button {
+    --md-text-button-label-text-color: var(--md-sys-color-primary);
+}
+
+/* Radio buttons and checkboxes */
+body.dark-theme input[type="radio"],
+body.dark-theme input[type="checkbox"] {
+    accent-color: var(--md-sys-color-primary);
+}
+
+/* Labels */
+body.dark-theme label {
+    color: var(--md-sys-color-on-surface);
+}
+
+/* Typography in dark mode */
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6 {
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme p,
+body.dark-theme span,
+body.dark-theme li {
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Links */
+body.dark-theme a {
+    color: var(--md-sys-color-primary);
+}
+
+body.dark-theme a:hover {
+    color: var(--md-sys-color-primary-container);
+}
+
+/* Tables */
+body.dark-theme table {
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme th {
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+body.dark-theme td {
+    border-color: var(--md-sys-color-outline-variant);
+}
+
+body.dark-theme tr:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+/* Smooth transitions */
+body,
+.navigation-drawer,
+.card-surface,
+.surface-card,
+.user-menu,
+.footer,
+.nav-item,
+.menu-item,
+select,
+input,
+textarea {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

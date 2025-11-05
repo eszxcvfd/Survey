@@ -3,75 +3,94 @@
 
 // Write your JavaScript code.
 
-// Theme Toggle
-function toggleTheme() {
-    document.body.classList.toggle('dark-theme');
-    localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
-}
-
-// Load saved theme preference
-if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark-theme');
-}
-
-// Navigation Drawer Toggle
+// Toggle navigation drawer
 function toggleDrawer() {
     const drawer = document.querySelector('.navigation-drawer');
-    drawer.classList.toggle('visible');
+    
+    if (window.innerWidth <= 768) {
+        drawer.classList.toggle('visible');
+    }
 }
 
-// User Menu Toggle
+// Toggle theme (dark/light mode)
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    
+    const isDark = document.body.classList.contains('dark-theme');
+    
+    // Update icon
+    const icon = document.querySelector('[onclick="toggleTheme()"] .material-symbols-outlined');
+    if (icon) {
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+    
+    // Save preference to localStorage
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+// Load saved theme preference on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const icon = document.querySelector('[onclick="toggleTheme()"] .material-symbols-outlined');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if (icon) {
+            icon.textContent = 'light_mode';
+        }
+    } else {
+        if (icon) {
+            icon.textContent = 'dark_mode';
+        }
+    }
+});
+
+// Close drawer when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+        const drawer = document.querySelector('.navigation-drawer');
+        const isClickInsideDrawer = drawer?.contains(e.target);
+        const isMenuButton = e.target.closest('md-icon-button[onclick="toggleDrawer()"]');
+        
+        if (!isClickInsideDrawer && !isMenuButton && drawer?.classList.contains('visible')) {
+            drawer.classList.remove('visible');
+        }
+    }
+});
+
+// Toggle user menu
 function toggleUserMenu(event) {
     event.stopPropagation();
-    const menu = document.getElementById('userMenu');
-    
-    if (menu.style.display === 'none' || !menu.style.display) {
-        menu.style.display = 'block';
-    } else {
-        menu.style.display = 'none';
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu) {
+        const isVisible = userMenu.style.display === 'block';
+        userMenu.style.display = isVisible ? 'none' : 'block';
     }
 }
 
 // Close user menu when clicking outside
 document.addEventListener('click', function(event) {
-    const menu = document.getElementById('userMenu');
-    const profile = document.querySelector('.user-profile');
+    const userMenu = document.getElementById('userMenu');
+    const userProfile = document.querySelector('.user-profile');
     
-    if (menu && !menu.contains(event.target) && !profile?.contains(event.target)) {
-        menu.style.display = 'none';
+    if (userMenu && userProfile) {
+        if (!userProfile.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.style.display = 'none';
+        }
     }
 });
 
-// Auto-hide toast notifications
+// Prevent menu from closing when clicking inside it
 document.addEventListener('DOMContentLoaded', function() {
-    const toasts = document.querySelectorAll('.toast');
-    
-    toasts.forEach(function(toast) {
-        // Add animation classes
-        toast.style.animation = 'slideIn 0.3s ease-out';
-        
-        // Auto-hide after 4 seconds
-        setTimeout(function() {
-            toast.style.animation = 'slideOut 0.3s ease-in';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100%)';
-            
-            // Remove from DOM after animation
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 4000);
-        
-        // Allow manual close on click
-        toast.style.cursor = 'pointer';
-        toast.addEventListener('click', function() {
-            toast.style.animation = 'slideOut 0.3s ease-in';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100%)';
-            
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu) {
+        userMenu.addEventListener('click', function(event) {
+            // Chỉ close nếu click vào link hoặc button submit
+            if (event.target.closest('a') || event.target.closest('button[type="submit"]')) {
+                // Let the link/form handle navigation
+            } else {
+                event.stopPropagation();
+            }
         });
-    });
+    }
 });

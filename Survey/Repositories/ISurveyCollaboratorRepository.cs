@@ -1,4 +1,4 @@
-using Survey.Models;
+﻿using Survey.Models;
 
 namespace Survey.Repositories
 {
@@ -12,5 +12,6 @@ namespace Survey.Repositories
         Task UpdateAsync(SurveyCollaborator collaborator);
         Task DeleteAsync(Guid surveyId, Guid userId);
         Task<int> GetCollaboratorCountAsync(Guid surveyId);
+        Task<string?> GetRoleAsync(Guid surveyId, Guid userId); // ✅ Thêm method này
     }
 }

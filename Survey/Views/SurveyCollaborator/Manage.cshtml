@@ -1,18 +1,25 @@
-@model ManageCollaboratorsViewModel
+﻿@model ManageCollaboratorsViewModel
 @{
-    ViewData["Title"] = "Manage Collaborators";
+    ViewData["Title"] = "Manage Team - " + Model.SurveyTitle;
 }
 
-<div class="container" style="max-width: 1000px; padding: 24px;">
-    <div class="card-surface" style="padding: 24px; border-radius: 12px;">
-        <!-- Header -->
-        <div style="margin-bottom: 24px;">
-            <h1 class="md-typescale-headline-large">Manage Collaborators</h1>
-            <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
-                Survey: <strong>@Model.SurveyTitle</strong>
-            </p>
+<div class="container" style="max-width: 1200px; padding: 24px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <md-icon-button href="@Url.Action("Index", "Survey")">
+                <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div>
+                <h1 class="md-typescale-display-small">Manage Team</h1>
+                <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                    @Model.SurveyTitle
+                </p>
+            </div>
         </div>
+    </div>
 
+    <div class="card-surface" style="padding: 24px; border-radius: 12px;">
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success" style="padding: 12px; margin-bottom: 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 8px;">
@@ -32,7 +39,8 @@
             <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Add New Collaborator</h2>
             <form asp-action="Add" asp-controller="SurveyCollaborator" method="post">
                 @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="AddForm.SurveyId" />
+                <!-- ✅ FIX: Change from AddForm.SurveyId to SurveyId directly -->
+                <input type="hidden" name="SurveyId" value="@Model.SurveyId" />
                 
                 <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: start;">
                     <div>
@@ -96,7 +104,7 @@
                                     Joined: @collaborator.GrantedAtUtc.ToString("MMM dd, yyyy")
                                     @if (!string.IsNullOrEmpty(collaborator.GrantedByName))
                                     {
-                                        <span> � Invited by: @collaborator.GrantedByName</span>
+                                        <span> • Invited by: @collaborator.GrantedByName</span>
                                     }
                                 </div>
                             </div>

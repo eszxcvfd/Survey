@@ -233,26 +233,23 @@ namespace Survey.Services
 
             try
             {
-                // Check if user has access
-                var hasAccess = await HasAccessAsync(surveyId, currentUserId);
-                if (!hasAccess)
-                {
-                    _logger.LogWarning("User {UserId} does not have access to survey {SurveyId}", currentUserId, surveyId);
-                    return null;
-                }
-
-                // Check if user is owner or editor
-                var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
-                {
-                    _logger.LogWarning("User {UserId} does not have permission to edit survey {SurveyId}", currentUserId, surveyId);
-                    return null;
-                }
-
                 var survey = await _surveyRepository.GetByIdAsync(surveyId);
                 if (survey == null)
                 {
                     return null;
+                }
+
+                // ? FIX: Only Owner can access settings
+                var isOwner = survey.OwnerId == currentUserId;
+                if (!isOwner)
+                {
+                    // Check collaborator table
+                    var collaboration = await _collaboratorRepository.GetAsync(surveyId, currentUserId);
+                    if (collaboration == null || collaboration.Role != "Owner")
+                    {
+                        _logger.LogWarning("User {UserId} does not have permission to access settings for survey {SurveyId}", currentUserId, surveyId);
+                        return null;
+                    }
                 }
 
                 // Get counts
@@ -294,30 +291,28 @@ namespace Survey.Services
 
             try
             {
-                // Check if user has access
-                var hasAccess = await HasAccessAsync(model.SurveyId, currentUserId);
-                if (!hasAccess)
+                var survey = await _surveyRepository.GetByIdAsync(model.SurveyId);
+                if (survey == null)
                 {
-                    return ServiceResult.FailureResult("You do not have access to this survey");
+                    return ServiceResult.FailureResult("Survey not found");
                 }
 
-                // Check if user is owner or editor
-                var collaboration = await _collaboratorRepository.GetAsync(model.SurveyId, currentUserId);
-                if (collaboration == null || (collaboration.Role != "Owner" && collaboration.Role != "Editor"))
+                // ? FIX: Only Owner can update settings
+                var isOwner = survey.OwnerId == currentUserId;
+                if (!isOwner)
                 {
-                    return ServiceResult.FailureResult("Only survey owners and editors can update settings");
+                    // Check collaborator table
+                    var collaboration = await _collaboratorRepository.GetAsync(model.SurveyId, currentUserId);
+                    if (collaboration == null || collaboration.Role != "Owner")
+                    {
+                        return ServiceResult.FailureResult("Only survey owners can update settings");
+                    }
                 }
 
                 // Business rule validation: CloseAtUtc must be after OpenAtUtc
                 if (model.CloseAtUtc.HasValue && model.OpenAtUtc.HasValue && model.CloseAtUtc.Value <= model.OpenAtUtc.Value)
                 {
                     return ServiceResult.FailureResult("Closing date must be after opening date");
-                }
-
-                var survey = await _surveyRepository.GetByIdAsync(model.SurveyId);
-                if (survey == null)
-                {
-                    return ServiceResult.FailureResult("Survey not found");
                 }
 
                 // Check if survey has responses and status is changing to Draft

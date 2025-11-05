@@ -29,16 +29,16 @@ namespace Survey.Services
         {
             _logger.LogInformation("Getting aggregated report for survey {SurveyId}", surveyId);
 
-            // Check permission
-            var hasAccess = await _collaboratorRepository.ExistsAsync(surveyId, currentUserId);
+            // ✅ Kiểm tra quyền truy cập - Owner, Editor, Viewer đều có thể xem report
+            var hasAccess = await CheckAccessAsync(surveyId, currentUserId);
             if (!hasAccess)
             {
                 throw new UnauthorizedAccessException("You don't have access to this survey");
             }
 
             // Get survey info
-            var survey = await _surveyRepository.GetByIdAsync(surveyId);
-            if (survey == null)
+            var surveyInfo = await _surveyRepository.GetByIdAsync(surveyId);
+            if (surveyInfo == null)
             {
                 throw new ArgumentException("Survey not found");
             }
@@ -62,7 +62,7 @@ namespace Survey.Services
             var report = new ReportViewModel
             {
                 SurveyId = surveyId,
-                SurveyTitle = survey.Title,
+                SurveyTitle = surveyInfo.Title,
                 Filters = filters,
                 TotalResponses = totalResponses,
                 CompletedResponses = completedResponses,
@@ -122,14 +122,29 @@ namespace Survey.Services
         {
             _logger.LogInformation("Getting raw responses for survey {SurveyId}", surveyId);
 
-            // Check permission
-            var hasAccess = await _collaboratorRepository.ExistsAsync(surveyId, currentUserId);
-            if (!hasAccess)
+            // ✅ Kiểm tra quyền: CHỈ Owner và Editor mới export được, Viewer KHÔNG được
+            var role = await _collaboratorRepository.GetRoleAsync(surveyId, currentUserId);
+            
+            // Check if owner
+            var isOwner = await _surveyRepository.IsOwnerAsync(surveyId, currentUserId);
+            
+            if (!isOwner && (role == null || role == "Viewer"))
             {
-                throw new UnauthorizedAccessException("You don't have access to this survey");
+                throw new UnauthorizedAccessException("You don't have permission to export data. Only Owner and Editor can export.");
             }
 
             return await _reportRepository.GetRawResponsesAsync(surveyId, filters);
+        }
+
+        // ✅ Helper method để kiểm tra quyền truy cập (Owner, Editor, Viewer)
+        private async Task<bool> CheckAccessAsync(Guid surveyId, Guid currentUserId)
+        {
+            // Kiểm tra owner
+            var isOwner = await _surveyRepository.IsOwnerAsync(surveyId, currentUserId);
+            if (isOwner) return true;
+
+            // Kiểm tra collaborator (Editor hoặc Viewer)
+            return await _collaboratorRepository.ExistsAsync(surveyId, currentUserId);
         }
     }
 }
