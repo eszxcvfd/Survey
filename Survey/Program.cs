@@ -46,6 +46,11 @@ builder.Services.AddScoped<IQrCodeService, QrCodeService>();
 builder.Services.AddScoped<ILogicEngineService, LogicEngineService>();
 builder.Services.AddScoped<ISurveyTakerService, SurveyTakerService>();
 
+// Register Report Services
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IDataExportService, ExcelExportService>();
+
 // Thêm Session
 builder.Services.AddSession(options =>
 {

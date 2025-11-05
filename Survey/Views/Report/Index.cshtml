@@ -1,0 +1,356 @@
+﻿@model ReportViewModel
+@{
+    ViewData["Title"] = "Report & Analytics - " + Model.SurveyTitle;
+}
+
+<div class="container" style="max-width: 1400px; padding: 24px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <md-icon-button href="@Url.Action("Index", "Survey")">
+                <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div>
+                <h1 class="md-typescale-display-small">Report & Analytics</h1>
+                <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                    @Model.SurveyTitle
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <md-outlined-button onclick="window.location.href='@Url.Action("ExportExcel", new { surveyId = Model.SurveyId })'">
+                <md-icon slot="icon">download</md-icon>
+                Export Excel
+            </md-outlined-button>
+            <md-outlined-button onclick="window.location.href='@Url.Action("ExportPdf", new { surveyId = Model.SurveyId })'">
+                <md-icon slot="icon">picture_as_pdf</md-icon>
+                Export PDF
+            </md-outlined-button>
+        </div>
+    </div>
+
+    <!-- ✅ FILTER SECTION - Enhanced & Complete -->
+    <div class="card-surface" style="padding: 24px; margin-bottom: 24px; border-radius: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--md-sys-color-primary);">filter_list</span>
+            <h2 class="md-typescale-title-large">Filters</h2>
+        </div>
+        
+        <form method="get" asp-action="Index" asp-controller="Report" id="filterForm">
+            <input type="hidden" name="surveyId" value="@Model.SurveyId" />
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                
+                <!-- Date Range: Start Date -->
+                <div>
+                    <label class="md-typescale-label-large" style="display: block; margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">calendar_today</span>
+                        Start Date
+                    </label>
+                    <input type="date" 
+                           name="startDate" 
+                           id="startDate"
+                           value="@Model.Filters.StartDate?.ToString("yyyy-MM-dd")"
+                           class="form-control"
+                           style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; font-size: 14px; background: white;" />
+                </div>
+
+                <!-- Date Range: End Date -->
+                <div>
+                    <label class="md-typescale-label-large" style="display: block; margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">event</span>
+                        End Date
+                    </label>
+                    <input type="date" 
+                           name="endDate" 
+                           id="endDate"
+                           value="@Model.Filters.EndDate?.ToString("yyyy-MM-dd")"
+                           class="form-control"
+                           style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; font-size: 14px; background: white;" />
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label class="md-typescale-label-large" style="display: block; margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">info</span>
+                        Response Status
+                    </label>
+                    <select name="status" 
+                            id="statusFilter"
+                            class="form-select" 
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; font-size: 14px; background: white;">
+                        <option value="">All Statuses</option>
+                        <option value="Submitted" selected="@(Model.Filters.Status == "Submitted")">✅ Submitted (Completed)</option>
+                        <option value="InProgress" selected="@(Model.Filters.Status == "InProgress")">⏳ In Progress</option>
+                    </select>
+                </div>
+
+                <!-- Channel Filter -->
+                <div>
+                    <label class="md-typescale-label-large" style="display: block; margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">share</span>
+                        Distribution Channel
+                    </label>
+                    <select name="channelId" 
+                            id="channelFilter"
+                            class="form-select" 
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; font-size: 14px; background: white;">
+                        <option value="">All Channels</option>
+                        @* ✅ TODO: Populate with actual channels from database *@
+                        @* This will be populated from Model.AvailableChannels if you add it *@
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filter Action Buttons -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <md-text-button type="button" onclick="clearFilters()">
+                    <md-icon slot="icon">clear</md-icon>
+                    Clear All
+                </md-text-button>
+                <md-filled-button type="submit">
+                    <md-icon slot="icon">search</md-icon>
+                    Apply Filters
+                </md-filled-button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Filters Display -->
+    @if (Model.Filters.StartDate.HasValue || Model.Filters.EndDate.HasValue || Model.Filters.ChannelId.HasValue || !string.IsNullOrEmpty(Model.Filters.Status))
+    {
+        <div class="card-surface" style="padding: 16px; margin-bottom: 24px; border-radius: 12px; background: linear-gradient(135deg, var(--md-sys-color-tertiary-container) 0%, var(--md-sys-color-surface-variant) 100%);">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container); font-size: 24px;">filter_alt</span>
+                <span class="md-typescale-title-medium" style="color: var(--md-sys-color-on-tertiary-container);">Active Filters:</span>
+                
+                @if (Model.Filters.StartDate.HasValue)
+                {
+                    <span class="md-typescale-body-medium" style="padding: 6px 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">calendar_today</span>
+                        From: @Model.Filters.StartDate.Value.ToString("MMM dd, yyyy")
+                    </span>
+                }
+                @if (Model.Filters.EndDate.HasValue)
+                {
+                    <span class="md-typescale-body-medium" style="padding: 6px 16px; background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">event</span>
+                        To: @Model.Filters.EndDate.Value.ToString("MMM dd, yyyy")
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Filters.Status))
+                {
+                    <span class="md-typescale-body-medium" style="padding: 6px 16px; background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">info</span>
+                        Status: @Model.Filters.Status
+                    </span>
+                }
+                @if (Model.Filters.ChannelId.HasValue)
+                {
+                    <span class="md-typescale-body-medium" style="padding: 6px 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">share</span>
+                        Channel ID: @Model.Filters.ChannelId.Value.ToString().Substring(0, 8)...
+                    </span>
+                }
+                
+                <md-outlined-button onclick="clearFilters()" style="margin-left: auto;">
+                    <md-icon slot="icon">close</md-icon>
+                    Clear All Filters
+                </md-outlined-button>
+            </div>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="card-surface" style="padding: 20px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">group</span>
+                <div>
+                    <div class="md-typescale-headline-small">@Model.TotalResponses</div>
+                    <div class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">Total Responses</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-surface" style="padding: 20px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-secondary);">check_circle</span>
+                <div>
+                    <div class="md-typescale-headline-small">@Model.CompletedResponses</div>
+                    <div class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">Completed</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-surface" style="padding: 20px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: #FFA726);">pending</span>
+                <div>
+                    <div class="md-typescale-headline-small">@(Model.TotalResponses - Model.CompletedResponses)</div>
+                    <div class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">In Progress</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-surface" style="padding: 20px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-tertiary);">fact_check</span>
+                <div>
+                    <div class="md-typescale-headline-small">@Model.AnswerRate%</div>
+                    <div class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">Answer Rate</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-surface" style="padding: 20px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">quiz</span>
+                <div>
+                    <div class="md-typescale-headline-small">@Model.TotalAnsweredQuestions / @Model.TotalQuestions</div>
+                    <div class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">Questions Answered</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Statistics -->
+    @if (Model.QuestionStats.Any())
+    {
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            @foreach (var stat in Model.QuestionStats)
+            {
+                <div class="card-surface" style="padding: 24px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="md-typescale-label-medium" style="padding: 4px 8px; background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 4px;">
+                                    Q@(stat.QuestionOrder)
+                                </span>
+                                <span class="md-typescale-label-small" style="padding: 4px 8px; background-color: var(--md-sys-color-surface-variant); border-radius: 4px;">
+                                    @stat.QuestionType
+                                </span>
+                            </div>
+                            <h3 class="md-typescale-title-large">@stat.QuestionText</h3>
+                            <p class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">
+                                Total Answers: @stat.TotalAnswers
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (stat.DataPoints.Any())
+                    {
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center;">
+                            <!-- Chart Canvas -->
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="chart-@stat.QuestionId"></canvas>
+                            </div>
+
+                            <!-- Legend/Data Table -->
+                            <div>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid var(--md-sys-color-outline);">
+                                            <th class="md-typescale-label-small" style="text-align: left; padding: 8px;">Answer</th>
+                                            <th class="md-typescale-label-small" style="text-align: right; padding: 8px;">Count</th>
+                                            <th class="md-typescale-label-small" style="text-align: right; padding: 8px;">%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var point in stat.DataPoints)
+                                        {
+                                            <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                                                <td class="md-typescale-body-small" style="padding: 12px;">
+                                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                                        <div style="width: 16px; height: 16px; background-color: @point.Color; border-radius: 4px;"></div>
+                                                        <span>@point.Label</span>
+                                                    </div>
+                                                </td>
+                                                <td class="md-typescale-body-medium" style="text-align: right; padding: 12px; font-weight: 600;">
+                                                    @point.Value
+                                                </td>
+                                                <td class="md-typescale-body-medium" style="text-align: right; padding: 12px; color: var(--md-sys-color-primary); font-weight: 600;">
+                                                    @point.Percentage%
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="text-align: center; padding: 32px; color: var(--md-sys-color-on-surface-variant);">
+                            <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">bar_chart_off</span>
+                            <p class="md-typescale-body-medium" style="margin-top: 8px;">No responses yet for this question</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card-surface" style="padding: 64px; border-radius: 12px; text-align: center;">
+            <span class="material-symbols-outlined" style="font-size: 96px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5;">analytics</span>
+            <h2 class="md-typescale-headline-medium" style="margin-top: 16px;">No Data Yet</h2>
+            <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                Waiting for survey responses to generate analytics
+            </p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Clear all filters function
+        function clearFilters() {
+            window.location.href = '@Url.Action("Index", new { surveyId = Model.SurveyId })';
+        }
+
+        // Render charts for each question
+        @foreach (var stat in Model.QuestionStats)
+        {
+            if (stat.DataPoints.Any())
+            {
+                <text>
+                (function() {
+                    const ctx = document.getElementById('chart-@stat.QuestionId');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: [@Html.Raw(string.Join(",", stat.DataPoints.Select(p => $"'{p.Label}'")))],
+                                datasets: [{
+                                    data: [@Html.Raw(string.Join(",", stat.DataPoints.Select(p => p.Value)))],
+                                    backgroundColor: [@Html.Raw(string.Join(",", stat.DataPoints.Select(p => $"'{p.Color}'")))],
+                                    borderWidth: 2,
+                                    borderColor: '#FFFFFF'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                const label = context.label || '';
+                                                const value = context.parsed || 0;
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                return `${label}: ${value} (${percentage}%)`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })();
+                </text>
+            }
+        }
+    </script>
+}

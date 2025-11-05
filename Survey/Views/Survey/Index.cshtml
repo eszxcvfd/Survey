@@ -146,14 +146,13 @@
                                 <span class="material-symbols-outlined" slot="icon">edit_note</span>
                                 Design
                             </md-filled-tonal-button>
-                            
-                            @* THÊM NÚT LOGIC Ở ĐÂY 
-                            <md-outlined-button onclick="window.location.href='@Url.Action("Index", "BranchLogic", new { id = survey.SurveyId })'">
-                                <span class="material-symbols-outlined" slot="icon">rule</span>
-                                Logic
-                            </md-outlined-button>
-                            *@
                         }
+
+                        @* *** MỚI: Reports button *** *@
+                        <md-outlined-button onclick="window.location.href='@Url.Action("Index", "Report", new { surveyId = survey.SurveyId })'">
+                            <span class="material-symbols-outlined" slot="icon">analytics</span>
+                            Reports
+                        </md-outlined-button>
 
                         @* Settings button - Available for Owner and Editor *@
                         @if (survey.MyRole == "Owner" || survey.MyRole == "Editor")
