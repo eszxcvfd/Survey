@@ -1,19 +1,40 @@
+﻿@model global::Survey.DTOs.LoginDto
 @{
     ViewData["Title"] = "Login";
+    var recaptchaSiteKey = ViewData["RecaptchaSiteKey"]?.ToString() ?? "";
 }
 
 <section class="auth-card card-surface">
     <h2 class="md-typescale-headline-medium">Welcome back</h2>
-    <form asp-action="Login" asp-controller="Account" method="post" novalidate>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" style="padding: 12px; margin-bottom: 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 8px;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-error" style="padding: 12px; margin-bottom: 16px; background-color: rgba(179, 38, 30, 0.1); color: var(--md-sys-color-error); border-radius: 8px;">
+            <div asp-validation-summary="ModelOnly"></div>
+        </div>
+    }
+
+    <form asp-action="Login" asp-controller="Account" method="post" novalidate id="loginForm">
         @Html.AntiForgeryToken()
+        
         <div class="form-row">
             <md-outlined-text-field label="Email"
                                     name="Email"
                                     type="email"
+                                    value="@Model?.Email"
                                     autocomplete="username"
                                     required>
             </md-outlined-text-field>
+            <span asp-validation-for="Email" class="text-danger md-typescale-body-small"></span>
         </div>
+
         <div class="form-row">
             <md-outlined-text-field label="Password"
                                     name="Password"
@@ -21,7 +42,39 @@
                                     autocomplete="current-password"
                                     required>
             </md-outlined-text-field>
+            <span asp-validation-for="Password" class="text-danger md-typescale-body-small"></span>
         </div>
+
+        @if (Model?.ShowCaptcha == true && !string.IsNullOrEmpty(recaptchaSiteKey))
+        {
+            <div class="form-row" style="margin: 16px 0;">
+                <div class="g-recaptcha" 
+                     data-sitekey="@recaptchaSiteKey"
+                     data-callback="onRecaptchaSuccess">
+                </div>
+                <input type="hidden" asp-for="CaptchaResponse" id="captchaResponse" />
+                <span class="text-danger md-typescale-body-small" style="display: block; margin-top: 4px;">
+                    Please complete the CAPTCHA verification
+                </span>
+            </div>
+            
+            <!-- DEBUG: Hiển thị giá trị captcha để kiểm tra -->
+            <div style="font-size: 10px; color: #666; margin-top: 4px;">
+                Debug - Captcha Value: <span id="debugCaptcha">Not set</span>
+            </div>
+        }
+
+        <div class="form-row" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <md-checkbox name="RememberMe" value="true"></md-checkbox>
+                <label for="RememberMe" style="cursor: pointer;">Remember me</label>
+            </div>
+            <a href="@Url.Action("ForgotPassword","Account")" 
+               style="color: var(--md-sys-color-primary); text-decoration: none; font-size: 14px;">
+                Forgot password?
+            </a>
+        </div>
+
         <div class="form-actions">
             <md-filled-button type="submit">Sign in</md-filled-button>
             <md-text-button type="button" onclick="window.location.href='@Url.Action("Register","Account")'">
@@ -30,3 +83,43 @@
         </div>
     </form>
 </section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    @if (Model?.ShowCaptcha == true && !string.IsNullOrEmpty(recaptchaSiteKey))
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script>
+            function onRecaptchaSuccess(token) {
+                console.log('reCAPTCHA success callback fired');
+                console.log('Token received:', token);
+                
+                var hiddenInput = document.getElementById('captchaResponse');
+                if (hiddenInput) {
+                    hiddenInput.value = token;
+                    console.log('Token set to hidden input:', hiddenInput.value);
+                    
+                    // Update debug display
+                    var debugSpan = document.getElementById('debugCaptcha');
+                    if (debugSpan) {
+                        debugSpan.textContent = token.substring(0, 20) + '...';
+                    }
+                } else {
+                    console.error('Hidden input #captchaResponse not found!');
+                }
+            }
+            
+            // Debug: Log form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                var captchaValue = document.getElementById('captchaResponse')?.value;
+                console.log('Form submitting with captcha value:', captchaValue || 'EMPTY');
+                
+                if (!captchaValue) {
+                    console.warn('CAPTCHA value is empty on form submit!');
+                }
+            });
+        </script>
+    }
+}
+

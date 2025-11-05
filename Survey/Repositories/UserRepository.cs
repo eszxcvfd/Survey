@@ -24,6 +24,12 @@ namespace Survey.Repositories
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
+        public async Task<User?> GetUserByResetTokenAsync(string token)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.ResetToken == token);
+        }
+
         public async Task AddAsync(User user)
         {
             await _context.Users.AddAsync(user);

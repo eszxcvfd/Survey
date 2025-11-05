@@ -14,5 +14,9 @@ namespace Survey.DTOs
 
         [Display(Name = "Remember me")]
         public bool RememberMe { get; set; }
+
+        // New properties for CAPTCHA support
+        public bool ShowCaptcha { get; set; }
+        public string? CaptchaResponse { get; set; }
     }
 }
