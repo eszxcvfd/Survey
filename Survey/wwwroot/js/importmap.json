@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@material/web/": "/lib/material-web/"
+  }
+}

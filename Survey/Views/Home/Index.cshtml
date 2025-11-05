@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "";
+}
+
+<section class="hero poster-home">
+    <div class="hero-content">
+        <h1 class="md-typescale-display-large">Build surveys faster</h1>
+        <p class="md-typescale-title-large">Material 3 experience for modern data collection</p>
+        <div class="hero-actions">
+            <md-filled-button href="@Url.Action("About","Home")">
+                Get started
+            </md-filled-button>
+            <md-outlined-button href="@Url.Action("Help","Home")">
+                Learn more
+            </md-outlined-button>
+        </div>
+    </div>
+</section>
+
+<section class="feature-grid">
+    <div class="card-surface">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary);">design_services</span>
+        <h3 class="md-typescale-title-large">Design</h3>
+        <p class="md-typescale-body-medium">Create polished forms with Material components.</p>
+        <md-text-button href="@Url.Action("Communication","Home")">Explore</md-text-button>
+    </div>
+    <div class="card-surface">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-secondary);">share</span>
+        <h3 class="md-typescale-title-large">Share</h3>
+        <p class="md-typescale-body-medium">Send and collect responses anywhere.</p>
+        <md-text-button href="@Url.Action("Help","Home")">How it works</md-text-button>
+    </div>
+    <div class="card-surface">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary);">analytics</span>
+        <h3 class="md-typescale-title-large">Analyze</h3>
+        <p class="md-typescale-body-medium">Understand results with clear insights.</p>
+        <md-text-button href="@Url.Action("About","Home")">Details</md-text-button>
+    </div>
+</section>

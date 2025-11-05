@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<section class="auth-card card-surface">
+    <h2 class="md-typescale-headline-medium">Welcome back</h2>
+    <form asp-action="Login" asp-controller="Account" method="post" novalidate>
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <md-outlined-text-field label="Email"
+                                    name="Email"
+                                    type="email"
+                                    autocomplete="username"
+                                    required>
+            </md-outlined-text-field>
+        </div>
+        <div class="form-row">
+            <md-outlined-text-field label="Password"
+                                    name="Password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    required>
+            </md-outlined-text-field>
+        </div>
+        <div class="form-actions">
+            <md-filled-button type="submit">Sign in</md-filled-button>
+            <md-text-button type="button" onclick="window.location.href='@Url.Action("Register","Account")'">
+                Create account
+            </md-text-button>
+        </div>
+    </form>
+</section>

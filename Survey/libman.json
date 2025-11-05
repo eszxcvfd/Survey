@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "unpkg",
+      "library": "@material/web@1.4.1",
+      "destination": "wwwroot/lib/material-web/"
+    }
+  ]
+}

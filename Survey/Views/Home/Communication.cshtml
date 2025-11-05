@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Communication";
+}
+
+<section class="hero poster-comm">
+    <div class="hero-content">
+        <h1 class="md-typescale-display-large">Get in touch</h1>
+        <p class="md-typescale-title-medium">We’d love to hear from you.</p>
+    </div>
+</section>
+
+<section class="card-surface form-narrow">
+    <form method="post" action="#">
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <md-outlined-text-field label="Your name" name="name" required></md-outlined-text-field>
+        </div>
+        <div class="form-row">
+            <md-outlined-text-field label="Email" name="email" type="email" required></md-outlined-text-field>
+        </div>
+        <div class="form-row">
+            <md-outlined-text-field label="Message" name="message" type="text" required rows="4" supporting-text="Tell us how we can help" textarea></md-outlined-text-field>
+        </div>
+        <div class="form-actions">
+            <md-filled-button type="submit">Send</md-filled-button>
+            <md-text-button type="reset">Reset</md-text-button>
+        </div>
+    </form>
+</section>

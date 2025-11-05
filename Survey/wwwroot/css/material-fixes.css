@@ -1,0 +1,514 @@
+﻿/* Remove accidental horizontal scrollbars */
+html, body { overflow-x: hidden; }
+
+.top-app-bar,
+.navigation-drawer,
+.drawer-content,
+.footer { overflow-x: hidden; }
+
+/* Header: prevent long titles from causing horizontal scroll */
+.top-app-bar h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Drawer: scroll only vertically; never horizontally */
+.drawer-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* In rail (collapsed) mode, hide labels to avoid overflow */
+.navigation-drawer:not(.expanded) .nav-label { display: none; }
+.navigation-drawer:not(.expanded) .nav-item { padding-inline: 0; }
+
+/* Make items fit the drawer width and avoid x-overflow from long text */
+.nav-item { width: 100%; }
+.nav-item .nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root {
+  --radius-xl: 28px;
+  --radius-l: 20px;
+  --radius-m: 16px;
+  --radius-s: 12px;
+  --radius-xs: 8px;
+  --elev-1: 0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+  --elev-2: 0 1px 2px 0 rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+  --elev-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Previous fixes */
+html, body { overflow-x: hidden; }
+.top-app-bar, .navigation-drawer, .drawer-content, .footer { overflow-x: hidden; }
+
+/* Shell rounding */
+.main-content { padding: 8px; }
+.top-app-bar {
+  border-radius: var(--radius-m);
+  margin: 8px;
+  box-shadow: var(--elev-1);
+}
+
+/* Header styling */
+.top-app-bar {
+  border-radius: var(--radius-m);
+  margin: 8px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(20px);
+  background: rgba(254, 247, 255, 0.95);
+}
+
+/* Poster (hero) sections */
+.hero, .auth-hero {
+  border-radius: var(--radius-xl);
+  padding: 64px 32px;
+  margin: 16px auto;
+  max-width: 1200px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--elev-2);
+}
+.hero .hero-actions { margin-top: 16px; display: flex; gap: 12px; }
+
+.poster-home {
+  background: 
+    radial-gradient(ellipse 1200px 500px at -10% -30%, rgba(234,221,255,0.8) 0%, transparent 70%),
+    radial-gradient(ellipse 1000px 600px at 110% 110%, rgba(208,188,255,0.6) 0%, transparent 60%),
+    linear-gradient(135deg, #FEF7FF 0%, #F6EDFF 100%);
+}
+.poster-about {
+  background: 
+    radial-gradient(ellipse 900px 400px at 0% 0%, rgba(249,222,220,0.7) 0%, transparent 65%),
+    linear-gradient(135deg, #FEF7FF 0%, #FFF5F5 100%);
+}
+.poster-help {
+  background: 
+    radial-gradient(ellipse 1000px 450px at 100% 0%, rgba(200,230,201,0.6) 0%, transparent 65%),
+    linear-gradient(135deg, #FEF7FF 0%, #F1F8F4 100%);
+}
+.poster-comm {
+  background: 
+    radial-gradient(ellipse 1100px 400px at 0% 100%, rgba(187,222,251,0.7) 0%, transparent 65%),
+    linear-gradient(135deg, #FEF7FF 0%, #E3F2FD 100%);
+}
+.poster-login {
+  background: 
+    radial-gradient(ellipse 950px 400px at 100% 0%, rgba(255,224,130,0.5) 0%, transparent 65%),
+    linear-gradient(135deg, #FEF7FF 0%, #FFF8E1 100%);
+}
+.poster-register {
+  background: 
+    radial-gradient(ellipse 950px 400px at 0% 0%, rgba(178,223,219,0.6) 0%, transparent 65%),
+    linear-gradient(135deg, #FEF7FF 0%, #E0F2F1 100%);
+}
+
+/* Card surface */
+.card-surface, .surface-card {
+  background: white;
+  border: 1px solid rgba(103,80,164,0.12);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  margin: 16px auto;
+  box-shadow: var(--elev-2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-surface:hover {
+  box-shadow: var(--elev-3);
+  transform: translateY(-2px);
+}
+
+/* Auth card centering */
+.auth-card {
+  max-width: 520px;
+  margin: 32px auto;
+  padding: 40px;
+}
+
+.auth-card h2 {
+  text-align: center;
+  margin-bottom: 32px;
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
+}
+
+.form-narrow {
+  max-width: 720px;
+}
+
+/* ============================================
+   BEAUTIFUL TEXT FIELDS - Material Design 3
+   ============================================ */
+md-outlined-text-field,
+md-filled-text-field {
+  display: block !important;
+  width: 100% !important;
+  min-height: 56px !important;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  
+  /* Custom shape and styling */
+  --md-outlined-text-field-container-shape: 16px;
+  --md-outlined-text-field-focus-outline-width: 2px;
+  --md-outlined-text-field-hover-outline-width: 1px;
+  --md-outlined-text-field-outline-width: 1px;
+  --md-outlined-text-field-container-padding-horizontal: 16px;
+  --md-outlined-text-field-container-padding-vertical: 16px;
+  
+  /* Colors */
+  --md-outlined-text-field-outline-color: rgba(103, 80, 164, 0.38);
+  --md-outlined-text-field-focus-outline-color: var(--md-sys-color-primary);
+  --md-outlined-text-field-hover-outline-color: rgba(103, 80, 164, 0.6);
+  --md-outlined-text-field-label-text-color: var(--md-sys-color-on-surface-variant);
+  --md-outlined-text-field-focus-label-text-color: var(--md-sys-color-primary);
+  --md-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
+  
+  /* Typography */
+  --md-outlined-text-field-input-text-size: 16px;
+  --md-outlined-text-field-label-text-size: 16px;
+  
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+md-outlined-text-field:focus-within {
+  --md-outlined-text-field-outline-width: 2px;
+}
+
+/* Form layout */
+.form-row {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-row.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .form-row.two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   BEAUTIFUL BUTTONS - Material Design 3
+   ============================================ */
+
+/* Filled Button - Primary action */
+md-filled-button {
+  --md-filled-button-container-shape: 100px;
+  --md-filled-button-container-height: 48px;
+  --md-filled-button-label-text-size: 15px;
+  --md-filled-button-label-text-weight: 500;
+  --md-filled-button-container-color: var(--md-sys-color-primary);
+  --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
+  --md-filled-button-hover-state-layer-opacity: 0.08;
+  --md-filled-button-pressed-state-layer-opacity: 0.12;
+  
+  min-width: 140px;
+  padding: 0 24px;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+  box-shadow: var(--elev-1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+md-filled-button:hover {
+  box-shadow: var(--elev-2);
+  transform: translateY(-1px);
+}
+
+md-filled-button:active {
+  box-shadow: var(--elev-1);
+  transform: translateY(0);
+}
+
+/* Outlined Button - Secondary action */
+md-outlined-button {
+  --md-outlined-button-container-shape: 100px;
+  --md-outlined-button-container-height: 48px;
+  --md-outlined-button-label-text-size: 15px;
+  --md-outlined-button-label-text-weight: 500;
+  --md-outlined-button-outline-color: var(--md-sys-color-primary);
+  --md-outlined-button-label-text-color: var(--md-sys-color-primary);
+  --md-outlined-button-hover-state-layer-opacity: 0.08;
+  --md-outlined-button-pressed-state-layer-opacity: 0.12;
+  --md-outlined-button-outline-width: 1px;
+  
+  min-width: 140px;
+  padding: 0 24px;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+md-outlined-button:hover {
+  --md-outlined-button-outline-width: 2px;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(103, 80, 164, 0.2);
+}
+
+md-outlined-button:active {
+  transform: translateY(0);
+}
+
+/* Text Button - Tertiary action */
+md-text-button {
+  --md-text-button-container-shape: 100px;
+  --md-text-button-container-height: 48px;
+  --md-text-button-label-text-size: 15px;
+  --md-text-button-label-text-weight: 500;
+  --md-text-button-label-text-color: var(--md-sys-color-primary);
+  --md-text-button-hover-state-layer-opacity: 0.08;
+  --md-text-button-pressed-state-layer-opacity: 0.12;
+  
+  min-width: 120px;
+  padding: 0 16px;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+md-text-button:hover {
+  background: rgba(103, 80, 164, 0.04);
+  transform: translateY(-1px);
+}
+
+md-text-button:active {
+  transform: translateY(0);
+}
+
+/* Form actions container */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Focus visible styles */
+md-filled-button:focus-visible,
+md-outlined-button:focus-visible,
+md-text-button:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 100px;
+}
+
+/* ============================================
+   FEATURE GRID (Home page)
+   ============================================ */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-grid .card-surface {
+  padding: 32px 24px;
+  text-align: center;
+  cursor: default;
+}
+
+.feature-grid h3 {
+  margin: 16px 0 12px;
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
+}
+
+.feature-grid p {
+  margin-bottom: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.6;
+}
+
+/* ============================================
+   FAQ STYLING
+   ============================================ */
+.faq {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq details {
+  margin-bottom: 16px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--md-sys-color-surface-variant);
+  padding: 20px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.faq details[open] {
+  background: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+  box-shadow: var(--elev-1);
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--md-sys-color-primary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::before {
+  content: '›';
+  display: inline-block;
+  font-size: 24px;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.faq details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.faq p {
+  margin-top: 16px;
+  padding-left: 36px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROSE CONTENT
+   ============================================ */
+.prose {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.prose ul {
+  margin-left: 24px;
+  margin-top: 16px;
+}
+
+.prose li {
+  margin-bottom: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ============================================
+   DRAWER IMPROVEMENTS
+   ============================================ */
+.drawer-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.navigation-drawer {
+  border-radius: 0 var(--radius-l) var(--radius-l) 0;
+}
+
+.navigation-drawer:not(.expanded) .nav-label { 
+  display: none; 
+}
+
+.navigation-drawer:not(.expanded) .nav-item { 
+  padding-inline: 0; 
+}
+
+.nav-item { 
+  width: 100%; 
+}
+
+.nav-item .nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================
+   SMOOTH ANIMATIONS
+   ============================================ */
+md-filled-button,
+md-outlined-button,
+md-text-button,
+md-outlined-text-field,
+.card-surface {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.loading {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(to right, 
+    var(--md-sys-color-surface-variant) 4%, 
+    var(--md-sys-color-surface) 25%, 
+    var(--md-sys-color-surface-variant) 36%);
+  background-size: 1000px 100%;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 640px) {
+  .auth-card {
+    padding: 24px;
+    margin: 16px;
+  }
+  
+  .hero, .auth-hero {
+    padding: 40px 20px;
+  }
+  
+  md-filled-button,
+  md-outlined-button {
+    min-width: 120px;
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Ẩn top-app-bar trên trang auth */
+body:has(.auth-card) .top-app-bar {
+  display: none;
+}
+
+/* Điều chỉnh padding khi không có top-app-bar */
+body:has(.auth-card) .main-content {
+  padding-top: 0;
+}
+
+/* Ẩn top-app-bar toàn bộ */
+.top-app-bar {
+  display: none !important;
+}
+
+.main-content {
+  padding-top: 0;
+}
