@@ -1,0 +1,299 @@
+﻿@model ManageChannelsViewModel
+@{
+    ViewData["Title"] = "Manage Distribution Channels - " + Model.SurveyTitle;
+}
+
+<div class="container" style="max-width: 1200px; padding: 24px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <md-icon-button href="@Url.Action("Index", "Survey")">
+                <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div>
+                <h1 class="md-typescale-display-small">Distribution Channels</h1>
+                <p class="md-typescale-body-large" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                    @Model.SurveyTitle
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success md-typescale-body-large" style="display: flex; align-items: center; gap: 16px; padding: 20px 24px; margin-bottom: 24px; background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%); color: #155724; border-radius: 16px; border-left: 6px solid #28A745; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);">
+            <span class="material-symbols-outlined" style="font-size: 32px; color: #28A745;">check_circle</span>
+            <div style="flex: 1;">
+                <strong style="display: block; font-size: 16px; margin-bottom: 4px;">Success!</strong>
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-error md-typescale-body-large" style="display: flex; align-items: start; gap: 16px; padding: 20px 24px; margin-bottom: 24px; background: linear-gradient(135deg, #F8D7DA 0%, #F5C2C7 100%); color: #842029; border-radius: 16px; border-left: 6px solid #DC3545; box-shadow: 0 4px 16px rgba(220, 53, 69, 0.25);">
+            <span class="material-symbols-outlined" style="font-size: 36px; color: #DC3545;">error</span>
+            <div style="flex: 1;">
+                <strong style="display: block; font-size: 18px; margin-bottom: 8px; color: #DC3545;">⚠️ Error</strong>
+                <p style="margin: 0; line-height: 1.6;">@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    }
+
+    <!-- Existing Channels -->
+    @if (Model.ExistingChannels.Any())
+    {
+        <div class="card-surface" style="padding: 24px; margin-bottom: 24px; border-radius: 12px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">
+                Active Channels (@Model.ExistingChannels.Count)
+            </h2>
+            <div style="display: grid; gap: 16px;">
+                @foreach (var channel in Model.ExistingChannels)
+                {
+                    <div class="channel-card card-surface" style="padding: 20px; background-color: var(--md-sys-color-surface-variant); border-radius: 12px; display: flex; gap: 20px; align-items: start;">
+                        <!-- QR Code -->
+                        @if (!string.IsNullOrEmpty(channel.QrImagePath))
+                        {
+                            <div style="flex-shrink: 0;">
+                                <img src="@channel.QrImagePath" alt="QR Code" style="width: 120px; height: 120px; border-radius: 8px; border: 2px solid var(--md-sys-color-outline);" />
+                            </div>
+                        }
+                        
+                        <!-- Channel Info -->
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="md-typescale-label-small" style="padding: 4px 12px; background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 16px;">
+                                    @channel.ChannelType
+                                </span>
+                                @if (channel.IsActive)
+                                {
+                                    <span class="md-typescale-label-small" style="padding: 4px 12px; background-color: #28A745; color: white; border-radius: 16px;">
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="md-typescale-label-small" style="padding: 4px 12px; background-color: #6C757D; color: white; border-radius: 16px;">
+                                        Inactive
+                                    </span>
+                                }
+                                @if (channel.SentAtUtc.HasValue)
+                                {
+                                    <span class="md-typescale-label-small" style="padding: 4px 12px; background-color: #17A2B8; color: white; border-radius: 16px;">
+                                        ✉️ Sent
+                                    </span>
+                                }
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <md-outlined-text-field 
+                                    value="@channel.FullUrl" 
+                                    readonly
+                                    style="flex: 1;"
+                                    label="Share Link">
+                                </md-outlined-text-field>
+                                <md-icon-button onclick="copyToClipboard('@channel.FullUrl')" title="Copy link">
+                                    <md-icon>content_copy</md-icon>
+                                </md-icon-button>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(channel.EmailSubject))
+                            {
+                                <div style="margin-top: 8px; padding: 8px; background-color: var(--md-sys-color-surface); border-radius: 4px;">
+                                    <span class="md-typescale-label-small">Subject:</span>
+                                    <span class="md-typescale-body-small">@channel.EmailSubject</span>
+                                </div>
+                            }
+
+                            <div style="display: flex; gap: 16px; margin-top: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">bar_chart</span>
+                                    <span class="md-typescale-body-small">@channel.ResponseCount responses</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
+                                    <span class="md-typescale-body-small">Created @channel.CreatedAtUtc.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                @if (channel.SentAtUtc.HasValue)
+                                {
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
+                                        <span class="md-typescale-body-small">Sent @channel.SentAtUtc.Value.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        @if (Model.CanEdit)
+                        {
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <form asp-action="ToggleStatus" method="post" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="channelId" value="@channel.ChannelId" />
+                                    <input type="hidden" name="surveyId" value="@Model.SurveyId" />
+                                    <md-outlined-button type="submit">
+                                        <md-icon slot="icon">@(channel.IsActive ? "pause_circle" : "play_circle")</md-icon>
+                                        @(channel.IsActive ? "Deactivate" : "Activate")
+                                    </md-outlined-button>
+                                </form>
+                                
+                                <form asp-action="Delete" method="post" style="display: inline;" 
+                                      onsubmit="return confirm('Are you sure you want to delete this channel?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="channelId" value="@channel.ChannelId" />
+                                    <input type="hidden" name="surveyId" value="@Model.SurveyId" />
+                                    <md-outlined-button type="submit" style="color: var(--md-sys-color-error);">
+                                        <md-icon slot="icon">delete</md-icon>
+                                        Delete
+                                    </md-outlined-button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card-surface" style="padding: 48px; margin-bottom: 24px; border-radius: 12px; text-align: center;">
+            <span class="material-symbols-outlined" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5;">share</span>
+            <h3 class="md-typescale-title-large" style="margin-top: 16px;">No distribution channels yet</h3>
+            <p class="md-typescale-body-medium" style="color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+                Create a link to share your survey with respondents
+            </p>
+        </div>
+    }
+
+    <!-- Create New Channel Form -->
+    @if (Model.CanEdit)
+    {
+        <div class="card-surface" style="padding: 24px; border-radius: 12px;">
+            <h2 class="md-typescale-title-large" style="margin-bottom: 16px;">Create New Channel</h2>
+            
+            <form asp-action="Create" method="post" id="createChannelForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="SurveyId" value="@Model.SurveyId" />
+
+                <div class="form-row" style="margin-bottom: 16px;">
+                    <label class="md-typescale-title-small" style="margin-bottom: 8px; display: block;">
+                        Channel Type
+                    </label>
+                    <select name="ChannelType" id="channelTypeSelect" class="form-select" required 
+                            style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="">-- Select type --</option>
+                        <option value="Link">🔗 Public Link (with QR Code)</option>
+                        <option value="Email">📧 Email Invitation</option>
+                    </select>
+                </div>
+
+                <!-- Email Fields (Hidden by default) -->
+                <div id="emailFields" style="display: none;">
+                    <div class="form-row" style="margin-bottom: 16px;">
+                        <md-outlined-text-field 
+                            name="RecipientEmails" 
+                            label="Recipient Emails"
+                            type="textarea"
+                            rows="3"
+                            placeholder="Enter emails separated by commas or new lines"
+                            style="width: 100%;">
+                        </md-outlined-text-field>
+                        <div class="md-typescale-body-small" style="margin-top: 4px; color: var(--md-sys-color-on-surface-variant);">
+                            Example: john@example.com, jane@example.com
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-bottom: 16px;">
+                        <md-outlined-text-field 
+                            name="EmailSubject" 
+                            label="Email Subject (Optional)"
+                            placeholder="You're invited to participate in a survey"
+                            style="width: 100%;">
+                        </md-outlined-text-field>
+                    </div>
+
+                    <div class="form-row" style="margin-bottom: 16px;">
+                        <md-outlined-text-field 
+                            name="EmailBody" 
+                            label="Additional Message (Optional)"
+                            type="textarea"
+                            rows="3"
+                            placeholder="Add a personal message to your invitation"
+                            style="width: 100%;">
+                        </md-outlined-text-field>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <md-text-button type="button" onclick="window.location.href='@Url.Action("Index", "Survey")'">
+                        Cancel
+                    </md-text-button>
+                    <md-filled-button type="submit">
+                        <md-icon slot="icon">add</md-icon>
+                        Create Channel
+                    </md-filled-button>
+                </div>
+            </form>
+        </div>
+    }
+</div>
+
+<script>
+    // Show/hide email fields based on channel type
+    document.getElementById('channelTypeSelect').addEventListener('change', function() {
+        const emailFields = document.getElementById('emailFields');
+        if (this.value === 'Email') {
+            emailFields.style.display = 'block';
+        } else {
+            emailFields.style.display = 'none';
+        }
+    });
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Create small toast notification
+            const toast = document.createElement('div');
+            toast.className = 'copy-toast';
+            toast.innerHTML = `
+                <span class="material-symbols-outlined" style="font-size: 20px;">check_circle</span>
+                <span>Link copied!</span>
+            `;
+            
+            // Inline styles for compact toast
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                padding: 12px 20px;
+                background-color: var(--md-sys-color-inverse-surface);
+                color: var(--md-sys-color-inverse-on-surface);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-size: 14px;
+                font-family: 'Roboto', sans-serif;
+                animation: slideInUp 0.3s ease-out;
+                max-width: 250px;
+                white-space: nowrap;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 2 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutDown 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+            alert('Failed to copy link');
+        });
+    }
+</script>
+

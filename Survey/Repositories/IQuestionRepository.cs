@@ -12,5 +12,10 @@ namespace Survey.Repositories
         Task UpdateAsync(Question question);
         Task DeleteAsync(Guid questionId);
         Task<int> GetMaxOrderBySurveyIdAsync(Guid surveyId);
+        
+        // NEW: Methods for Logic Engine
+        Task<Question?> GetFirstQuestionAsync(Guid surveyId);
+        Task<Question?> GetNextQuestionInOrderAsync(Guid surveyId, Guid currentQuestionId);
+        Task<Question?> GetNextQuestionAfterAsync(Guid surveyId, Guid targetQuestionId);
     }
 }

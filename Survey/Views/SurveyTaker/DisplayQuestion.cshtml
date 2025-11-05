@@ -1,0 +1,192 @@
+﻿@model TakeSurveyViewModel
+@{
+    ViewData["Title"] = Model.SurveyTitle;
+}
+
+<div style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 24px;">
+    <div class="card-surface" style="max-width: 800px; width: 100%; padding: 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        
+        <!-- Survey Header -->
+        <div style="margin-bottom: 32px; text-align: center;">
+            <h1 class="md-typescale-headline-large" style="margin-bottom: 8px;">@Model.SurveyTitle</h1>
+            @if (!string.IsNullOrEmpty(Model.SurveyDescription))
+            {
+                <p class="md-typescale-body-medium" style="color: var(--md-sys-color-on-surface-variant);">@Model.SurveyDescription</p>
+            }
+        </div>
+
+        <!-- ĐÃ XÓA PROGRESS BAR Ở ĐÂY -->
+
+        <!-- Question Form -->
+        <form asp-action="SubmitAnswer" asp-controller="SurveyTaker" method="post" id="answerForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ResponseId" value="@Model.ResponseId" />
+            <input type="hidden" name="QuestionId" value="@Model.CurrentQuestion.QuestionId" />
+
+            <!-- Question Text -->
+            <div style="margin-bottom: 24px;">
+                <h2 class="md-typescale-title-large" style="margin-bottom: 8px;">
+                    @Model.CurrentQuestion.QuestionText
+                    @if (Model.CurrentQuestion.IsRequired)
+                    {
+                        <span style="color: var(--md-sys-color-error);">*</span>
+                    }
+                </h2>
+                @if (!string.IsNullOrEmpty(Model.CurrentQuestion.HelpText))
+                {
+                    <p class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">@Model.CurrentQuestion.HelpText</p>
+                }
+            </div>
+
+            <!-- Answer Input (based on question type) -->
+            <div style="margin-bottom: 32px;">
+                @switch (Model.CurrentQuestion.QuestionType)
+                {
+                    case "ShortText":
+                        <md-outlined-text-field 
+                            name="AnswerText" 
+                            label="Your answer"
+                            style="width: 100%;"
+                            required="@Model.CurrentQuestion.IsRequired">
+                        </md-outlined-text-field>
+                        break;
+
+                    case "LongText":
+                        <md-outlined-text-field 
+                            name="AnswerText" 
+                            label="Your answer"
+                            type="textarea"
+                            rows="5"
+                            style="width: 100%;"
+                            required="@Model.CurrentQuestion.IsRequired">
+                        </md-outlined-text-field>
+                        break;
+
+                    case "Number":
+                        <md-outlined-text-field 
+                            name="NumericValue" 
+                            label="Your answer"
+                            type="number"
+                            style="width: 100%;"
+                            required="@Model.CurrentQuestion.IsRequired">
+                        </md-outlined-text-field>
+                        break;
+
+                    case "Email":
+                        <md-outlined-text-field 
+                            name="AnswerText" 
+                            label="Email address"
+                            type="email"
+                            style="width: 100%;"
+                            required="@Model.CurrentQuestion.IsRequired">
+                        </md-outlined-text-field>
+                        break;
+
+                    case "Date":
+                        <input 
+                            type="date" 
+                            name="DateValue" 
+                            class="form-control"
+                            style="width: 100%; padding: 16px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 16px;"
+                            required="@Model.CurrentQuestion.IsRequired" />
+                        break;
+
+                    case "MultipleChoice":
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            @foreach (var option in Model.CurrentQuestion.Options.OrderBy(o => o.OptionOrder))
+                            {
+                                <label class="option-label" style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid var(--md-sys-color-outline-variant); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                                    <input type="radio" name="SelectedOptionId" value="@option.OptionId" required="@Model.CurrentQuestion.IsRequired" style="width: 20px; height: 20px;" />
+                                    <span class="md-typescale-body-large">@option.OptionText</span>
+                                </label>
+                            }
+                        </div>
+                        break;
+
+                    case "Checkboxes":
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            @foreach (var option in Model.CurrentQuestion.Options.OrderBy(o => o.OptionOrder))
+                            {
+                                <label class="option-label" style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid var(--md-sys-color-outline-variant); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                                    <md-checkbox name="SelectedOptionIds" value="@option.OptionId"></md-checkbox>
+                                    <span class="md-typescale-body-large">@option.OptionText</span>
+                                </label>
+                            }
+                        </div>
+                        break;
+
+                    case "Dropdown":
+                        <select name="SelectedOptionId" 
+                                class="form-select" 
+                                required="@Model.CurrentQuestion.IsRequired"
+                                style="width: 100%; padding: 16px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; font-size: 16px; background: white;">
+                            <option value="">-- Select an option --</option>
+                            @foreach (var option in Model.CurrentQuestion.Options.OrderBy(o => o.OptionOrder))
+                            {
+                                <option value="@option.OptionId">@option.OptionText</option>
+                            }
+                        </select>
+                        break;
+
+                    case "RatingScale":
+                        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                            @for (int i = 1; i <= Model.CurrentQuestion.Options.Count; i++)
+                            {
+                                var option = Model.CurrentQuestion.Options.FirstOrDefault(o => o.OptionOrder == i);
+                                if (option != null)
+                                {
+                                    <label class="rating-label" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="SelectedOptionId" value="@option.OptionId" required="@Model.CurrentQuestion.IsRequired" style="display: none;" />
+                                        <div class="rating-circle" style="width: 60px; height: 60px; border: 3px solid var(--md-sys-color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; transition: all 0.2s;">
+                                            @i
+                                        </div>
+                                        <span class="md-typescale-label-small" style="margin-top: 4px;">@option.OptionText</span>
+                                    </label>
+                                }
+                            }
+                        </div>
+                        break;
+                }
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div style="display: flex; justify-content: flex-end; gap: 16px;">
+                <md-filled-button type="submit" style="min-width: 120px;">
+                    @if (Model.IsLastQuestion)
+                    {
+                        <md-icon slot="icon">check</md-icon>
+                        <span>Submit</span>
+                    }
+                    else
+                    {
+                        <md-icon slot="icon">arrow_forward</md-icon>
+                        <span>Next</span>
+                    }
+                </md-filled-button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .option-label:hover {
+        border-color: var(--md-sys-color-primary);
+        background-color: var(--md-sys-color-primary-container);
+    }
+
+    .option-label input:checked + span {
+        font-weight: 600;
+        color: var(--md-sys-color-primary);
+    }
+
+    .rating-label input:checked ~ .rating-circle {
+        background-color: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+        transform: scale(1.1);
+    }
+
+    .rating-circle:hover {
+        transform: scale(1.05);
+        background-color: var(--md-sys-color-primary-container);
+    }
+</style>

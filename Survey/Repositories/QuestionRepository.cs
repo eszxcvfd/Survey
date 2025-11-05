@@ -71,5 +71,41 @@ namespace Survey.Repositories
                 .MaxAsync(q => (int?)q.QuestionOrder);
             return maxOrder ?? 0;
         }
+
+        // *** NEW: Methods for Logic Engine ***
+
+        public async Task<Question?> GetFirstQuestionAsync(Guid surveyId)
+        {
+            return await _context.Questions
+                .Include(q => q.QuestionOptions.OrderBy(o => o.OptionOrder))
+                .Where(q => q.SurveyId == surveyId)
+                .OrderBy(q => q.QuestionOrder)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Question?> GetNextQuestionInOrderAsync(Guid surveyId, Guid currentQuestionId)
+        {
+            var currentQuestion = await GetByIdAsync(currentQuestionId);
+            if (currentQuestion == null) return null;
+
+            return await _context.Questions
+                .Include(q => q.QuestionOptions.OrderBy(o => o.OptionOrder))
+                .Where(q => q.SurveyId == surveyId && q.QuestionOrder > currentQuestion.QuestionOrder)
+                .OrderBy(q => q.QuestionOrder)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Question?> GetNextQuestionAfterAsync(Guid surveyId, Guid targetQuestionId)
+        {
+            // This gets the question AFTER the target question (used for "SkipQuestion")
+            var targetQuestion = await GetByIdAsync(targetQuestionId);
+            if (targetQuestion == null) return null;
+
+            return await _context.Questions
+                .Include(q => q.QuestionOptions.OrderBy(o => o.OptionOrder))
+                .Where(q => q.SurveyId == surveyId && q.QuestionOrder > targetQuestion.QuestionOrder)
+                .OrderBy(q => q.QuestionOrder)
+                .FirstOrDefaultAsync();
+        }
     }
 }

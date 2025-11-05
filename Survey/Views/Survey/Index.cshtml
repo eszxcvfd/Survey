@@ -170,6 +170,12 @@
                             Team
                         </md-outlined-button>
                         
+                        @* Share button *@
+                        <md-outlined-button onclick="window.location.href='@Url.Action("Manage", "SurveyChannel", new { surveyId = survey.SurveyId })'">
+                            <span class="material-symbols-outlined" slot="icon">share</span>
+                            Share
+                        </md-outlined-button>
+
                         @* Delete button - Only for Owner *@
                         @if (survey.MyRole == "Owner")
                         {

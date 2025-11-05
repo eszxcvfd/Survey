@@ -20,6 +20,10 @@ builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionOptionRepository, QuestionOptionRepository>();
 builder.Services.AddScoped<IBranchLogicRepository, BranchLogicRepository>();
 
+// *** PHẦN 2: Survey Taker Repositories ***
+builder.Services.AddScoped<ISurveyResponseRepository, SurveyResponseRepository>();
+builder.Services.AddScoped<IResponseAnswerRepository, ResponseAnswerRepository>();
+
 // Đăng ký Security Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
@@ -31,6 +35,16 @@ builder.Services.AddScoped<ISurveyCollaboratorService, SurveyCollaboratorService
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<ISurveyDesignerService, SurveyDesignerService>();
 builder.Services.AddScoped<IBranchLogicService, BranchLogicService>();
+
+// Channel Management
+builder.Services.AddScoped<ISurveyChannelRepository, SurveyChannelRepository>();
+builder.Services.AddScoped<ISurveyChannelService, SurveyChannelService>();
+builder.Services.AddScoped<ISlugGenerator, SlugGenerator>();
+builder.Services.AddScoped<IQrCodeService, QrCodeService>();
+
+// *** PHẦN 2: Survey Taker Services (Logic Engine & Survey Taking) ***
+builder.Services.AddScoped<ILogicEngineService, LogicEngineService>();
+builder.Services.AddScoped<ISurveyTakerService, SurveyTakerService>();
 
 // Thêm Session
 builder.Services.AddSession(options =>
