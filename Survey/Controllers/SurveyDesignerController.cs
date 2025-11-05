@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Survey.DTOs;
 using Survey.Services;
 
@@ -51,6 +51,41 @@ namespace Survey.Controllers
             {
                 TempData["ErrorMessage"] = "Survey not found or you don't have permission to edit it";
                 return RedirectToAction("Index", "Survey");
+            }
+
+            return View(model);
+        }
+
+        // *** MỚI: Preview Survey Action ***
+        [HttpGet]
+        public async Task<IActionResult> Preview(Guid id)
+        {
+            _logger.LogInformation("=== Preview Survey called for {SurveyId} ===", id);
+
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get survey data
+            var model = await _designerService.GetSurveyForDesignerAsync(id, currentUserId.Value);
+            if (model == null)
+            {
+                TempData["ErrorMessage"] = "Survey not found or you don't have permission to preview it";
+                return RedirectToAction("Index", "Survey");
+            }
+
+            // Check if survey has questions
+            if (!model.Questions.Any())
+            {
+                TempData["ErrorMessage"] = "Cannot preview an empty survey. Please add questions first.";
+                return RedirectToAction("Index", new { id = id });
             }
 
             return View(model);

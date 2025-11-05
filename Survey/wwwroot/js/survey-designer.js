@@ -1,4 +1,4 @@
-// Survey Designer JavaScript
+﻿// Survey Designer JavaScript
 let surveyId;
 let isDirty = false;
 
@@ -266,6 +266,18 @@ async function reorderQuestions() {
     }
 }
 
+// *** CẬP NHẬT: Preview Survey Function ***
+function previewSurvey() {
+    const surveyIdElement = document.getElementById('surveyId');
+    if (surveyIdElement) {
+        const surveyId = surveyIdElement.value;
+        window.location.href = `/SurveyDesigner/Preview?id=${surveyId}`;
+    } else {
+        console.error('Survey ID not found');
+        showToast('Error: Survey ID not found', 'error');
+    }
+}
+
 // Helper functions
 
 function extractQuestionData(card) {
@@ -322,10 +334,6 @@ function updateQuestionCount() {
     if (countElement) {
         countElement.textContent = count;
     }
-}
-
-function previewSurvey() {
-    showToast('Preview feature coming soon', 'info');
 }
 
 // UI helper functions
